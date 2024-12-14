@@ -1,0 +1,10 @@
+pandas
+numpy
+matplotlib
+scipy
+
+uncertainties
+docx
+math2docx
+
+sympy

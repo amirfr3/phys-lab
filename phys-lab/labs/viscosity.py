@@ -1,7 +1,5 @@
-import pandas as pd
-
 import math
-
+import pandas as pd
 from pprint import pprint
 
 from ..graph.graph import make_graph

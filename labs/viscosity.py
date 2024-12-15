@@ -2,8 +2,8 @@ import math
 import pandas as pd
 from pprint import pprint
 
-from ..graph.graph import make_graph
-from ..graph.fit import fit_curve, extract_fit_param, linear, exponential
+from pylab.graph.graph import make_graph
+from pylab.graph.fit import fit_curve, extract_fit_param, linear, exponential
 
 
 def build_xy_table(ball_sheet_file, ball_sheet_name, ball_diameter):

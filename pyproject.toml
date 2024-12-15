@@ -1,0 +1,13 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "physpy"
+dynamic = ["version"]
+
+[tool.hatch.version]
+path = "physpy/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["physpy"]

@@ -43,7 +43,7 @@ def nsigma_with_outer_value(name, outer_val, outer_val_error, param_index, value
             print(
                 f"nsigma {name}, {n} = {outer_val}+-{outer_val_error} / {fit_params[param_index]}+-{fit_params_error[param_index]}"
             )
-            return (f"({name}) \ \ " + "N_{\sigma}", None, n, None)
+            return (f"({name}) \\ \\ " + "N_{\\sigma}", None, n, None)
 
     else:
 
@@ -57,6 +57,6 @@ def nsigma_with_outer_value(name, outer_val, outer_val_error, param_index, value
             print(
                 f"nsigma {name}, {n} = {outer_val}+-{outer_val_error} / {values[value_index][2]}+-{values[value_index][3]}"
             )
-            return (f"({name}) \ \ " + "N_{\sigma}", None, n, None)
+            return (f"({name}) \\ \\ " + "N_{\\sigma}", None, n, None)
 
     return nsigma_calc

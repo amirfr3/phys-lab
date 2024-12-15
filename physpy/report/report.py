@@ -13,12 +13,12 @@ def add_math_to_tbl(row, name, dimension, value, error=None):
         v = v[v.index("-") + 1:]
         p = ""
     else:
-        v = f"{uncertainties.ufloat(value, error):.2uf}".replace("+/-", "\pm ")
+        v = f"{uncertainties.ufloat(value, error):.2uf}".replace("+/-", "\\pm ")
         p = f"{uncertainties.ufloat(0, abs((error/value)*100)):.2uf}"
         p = p[p.index("-") + 1:]
-        p = f"\ \ \ ({p}\%)"
+        p = f"\\ \\ \\ ({p}\\%)"
     if dimension is None:
         dimension = ""
     else:
         dimension = f"[{dimension}]"
-    math2docx.add_math(par, f"{name} = {v} \ {dimension} {p}")
+    math2docx.add_math(par, f"{name} = {v} \\ {dimension} {p}")

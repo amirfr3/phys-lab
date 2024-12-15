@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from scipy.odr import Model, ODR, RealData
 
-from stats import calc_stats, format_output
+from .stats import calc_stats, format_output
 
 # === Types of fits - add custom fits as necessary === #
 

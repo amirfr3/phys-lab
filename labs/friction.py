@@ -1,17 +1,19 @@
 import math
-import pandas as pd
 from pprint import pprint
+
+import pandas as pd
 
 import sympy
 from sympy.parsing.latex import parse_latex
 
-from ..graph.graph import make_graph
-from ..graph.fit import fit_curve, extract_fit_param, linear, polynomial
-from ..equation.equation import (
-    get_uncertainties,
-    calculate_indirect_error_formula,
-    calculate_value_with_uncertainty,
-)
+# from physpy.graph.graph import make_graph
+# from physpy.graph.fit import fit_curve, extract_fit_param, linear, polynomial
+# from physpy.equation.equation import (
+#     get_uncertainties,
+#     calculate_indirect_error_formula,
+#     calculate_value_with_uncertainty,
+# )
+import physpy
 
 
 DATASHEET_FOLDER = r"C:\Users\flami\OneDrive\School\SemA\LabA\Friction\results"
@@ -27,11 +29,16 @@ def main():
     should_show = True
     # calibrate = True
 
-    mu_k_symbols = sympy.symbols("v_0,v_f,g,x")
-    mu_k_expr = sympy.parsing.latex.parse_latex(r"\mu_k = -\frac{v_f^2 - v_0^2}{2gx}")
-    print(mu_k_expr)
-    delta_mu_k_expr = calculate_indirect_error_formula(mu_k_expr)
-    print(delta_mu_k_expr)
+    # Part A - Calculate friction coefficient
+
+    # Perform linear fit for all sets of measurements
+    # Linear fit 
+    v_0, v_f, g, x = sympy.symbols("v_0,v_f,g,x")
+    mu_k_expr = sympy.Eq(sympy.symbols("mu_k"), -1 * (v_f ** 2 - v_0 ** 2) / 2*g*x)
+    print(sympy.latex(mu_k_expr))
+    delta_mu_k_expr = physpy.equation.calculate_indirect_error_formula(mu_k_expr)
+    print(sympy.latex(delta_mu_k_expr))
+    return
 
     mu_k_values_with_uncertainties = {
         "v_0": (1, 1),

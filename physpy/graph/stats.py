@@ -1,8 +1,9 @@
 import math
 from scipy import stats
+import numpy as np
 
 
-def calc_stats(x, y, fit_params, output, fit_func):
+def calc_stats(x, y, fit_func, fit_params, output):
     residuals = y - fit_func(fit_params, x)
     degrees_of_freedom = len(x) - len(fit_params)
     chi2 = output.sum_square

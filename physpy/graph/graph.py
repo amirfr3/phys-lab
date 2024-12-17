@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from .fit import fit_curve
 
 
 def build_plot_with_residuals(data, plot_name):

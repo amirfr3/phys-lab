@@ -105,7 +105,7 @@ def fit(columns,
     fig.savefig(data_graph, bbox_inches='tight')
     #Fit
     fit_params, fit_params_error, fit_cov, output = odr_fit(fit_func, initial_guesses, x, delta_x, y, delta_y)
-    residuals, degrees_of_freedom, chi2_red, p_val = calc_stats(x, y, fit_params, output, fit_func)
+    residuals, degrees_of_freedom, chi2_red, p_val = calc_stats(x, y, fit_func, fit_params, output)
     print_output(fit_params, fit_params_error, chi2_red, p_val, degrees_of_freedom)
 
     # Fit Graph
@@ -222,7 +222,7 @@ plt.show()
 fit_func = linear # Choose your fit function name
 initial_guesses = (0, 0,) # Define the initial guesses for the parameters in list "A" (make sure they are the same length, and in the same order!)
 fit_params, fit_params_error, fit_cov, output = odr_fit(fit_func, initial_guesses, x, delta_x, y, delta_y)
-residuals, degrees_of_freedom, chi2_red, p_val = calc_stats(x, y, fit_params, output, fit_func)
+residuals, degrees_of_freedom, chi2_red, p_val = calc_stats(x, y, fit_func, fit_params, output)
 print_output(fit_params, fit_params_error, chi2_red, p_val, degrees_of_freedom)
 
 f, f_error = 1/fit_params[0], fit_params_error[0]/(fit_params[0]**2)
@@ -322,7 +322,7 @@ plt.show()
 fit_func = optics # Choose your fit function name
 initial_guesses = (0, f_inf,) # Define the initial guesses for the parameters in list "A" (make sure they are the same length, and in the same order!)
 fit_params, fit_params_error, fit_cov, output = odr_fit(fit_func, initial_guesses, x, delta_x, y, delta_y)
-residuals, degrees_of_freedom, chi2_red, p_val = calc_stats(x, y, fit_params, output, fit_func)
+residuals, degrees_of_freedom, chi2_red, p_val = calc_stats(x, y, fit_func, fit_params, output)
 print_output(fit_params, fit_params_error, chi2_red, p_val, degrees_of_freedom)
 
 print(f"\nguessed f: {fit_params[1]} \u00B1 {fit_params_error[1]} ({(fit_params_error[1]/fit_params[1])*100}% error)")
@@ -431,7 +431,7 @@ plt.show()
 fit_func = linear # Choose your fit function name
 initial_guesses = (0, 0,) # Define the initial guesses for the parameters in list "A" (make sure they are the same length, and in the same order!)
 fit_params, fit_params_error, fit_cov, output = odr_fit(fit_func, initial_guesses, x, delta_x, y, delta_y)
-residuals, degrees_of_freedom, chi2_red, p_val = calc_stats(x, y, fit_params, output, fit_func)
+residuals, degrees_of_freedom, chi2_red, p_val = calc_stats(x, y, fit_func, fit_params, output)
 print_output(fit_params, fit_params_error, chi2_red, p_val, degrees_of_freedom)
 
 n_sigma = abs(H - fit_params[1]) / math.sqrt((H_error)**2 + fit_params_error[1]**2)

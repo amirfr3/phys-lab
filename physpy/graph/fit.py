@@ -80,12 +80,12 @@ def get_columns(data):
 def fit_curve(
     fit_func, initial_guesses, table_or_file_path, sheet_idx=None, columns=[0, 1, 2, 3]
 ):
-    if table_or_file_path is pd.DataFrame:
-        data = table_or_file_path
-    else:
+    try:
         if sheet_idx is None:
             raise ValueError("Please specify sheet name or index")
         data = pd.read_excel(table_or_file_path, sheet_name=sheet_idx)
+    except ValueError:
+        data = table_or_file_path
 
     x, delta_x, y, delta_y = get_columns(data)
 

@@ -1,13 +1,18 @@
 import sympy
-import uncertainties
+# import uncertainties
+
+
+def _get_uncertainty(symbol):
+    return sympy.symbols(f"Delta_{symbol.name}")
+    # return sympy.parsing.latex.parse_latex(f"\\Delta{{{symbol.name}}}")
 
 
 def get_uncertainties(symbols):
     if hasattr(symbols, '__iter__'):
-        return sympy.symbols([f"delta_{symbol.name}" for symbol in symbols])
-    else:
-        symbol = symbols
-        return sympy.symbols(f"delta_{symbol.name}")
+        return (_get_uncertainty(symbol) for symbol in symbols)
+
+    # Singular
+    return _get_uncertainty(symbols)
 
 
 class UnsupportedOperationError(KeyError):
@@ -20,45 +25,44 @@ def calculate_indirect_error_sym(expr):
     return get_uncertainties(expr)
 
 
+def calculate_indirect_error_add(expr):
+    assert expr.func is sympy.core.add.Add
+
+    return sympy.sqrt(sum([_calculate_indirect_error(s)**2 for s in expr.args]))
+
+
 def calculate_indirect_error_pow(expr):
-    assert expr.func is sympy.core.symbol.Symbol
+    assert expr.func is sympy.core.power.Pow
 
     # TODO: Recurse
     base, power = expr.args
     assert power > 1
 
-    return sympy.Eq(
-        get_uncertainties(expr.lhs),
-        power * base ** (power-1)
-    )
+    return expr.diff(base) * _calculate_indirect_error(base)
 
 
 def calculate_indirect_error_mul(expr):
     assert expr.func is sympy.core.mul.Mul
 
     # TODO: Change Pow operations to absolute value
-    e_unc = {e: calculate_indirect_error_formula(e).rhs for e in expr.args}
+    e_unc = {e: _calculate_indirect_error(e) for e in expr.args}
 
-    return sympy.Eq(
-        get_uncertainties(expr.lhs),
-        expr.lhs * sympy.sqrt(sum([(e_unc[e]/e)**2 for e in expr.args]))
-    )
+    return expr * sympy.sqrt(sum([(e_unc[e]/e)**2 for e in expr.args]))
 
 
-# TODO: Maybe receive list of parameters as well
-# Assumed to be equality
-def calculate_indirect_error_formula(expr):
-    # Basic version
-    return sympy.Eq(
-        get_uncertainties(expr.lhs),
-        sympy.sqrt(sum(
-            [(expr.rhs.diff(s)*get_uncertainties(s))**2 for s in expr.rhs.free_symbols]
-        ))
-    )
+def _calculate_indirect_error(expr):
+    if expr.is_number:
+        return expr
+
+    if sympy.core.numbers.NegativeOne in expr.args:
+        # Try absolute value and return to sender
+        print(expr)
+        return _calculate_indirect_error(-1*expr)
 
     # TODO: Handle integers
     OPS = {
         sympy.core.symbol.Symbol: calculate_indirect_error_sym,
+        sympy.core.add.Add: calculate_indirect_error_add,
         sympy.core.power.Pow: calculate_indirect_error_pow,
         sympy.core.mul.Mul: calculate_indirect_error_mul,
     }
@@ -68,6 +72,21 @@ def calculate_indirect_error_formula(expr):
 
     except KeyError:
         raise UnsupportedOperationError("Unsupported operation in expression")
+
+
+# TODO: Maybe receive list of parameters as well
+# Assumed to be equality
+def calculate_indirect_error_formula(expr):
+    assert expr.is_Equality, "Expression must be an equality"
+    # Basic version
+    return sympy.Eq(
+        get_uncertainties(expr.lhs),
+        sympy.sqrt(sum(
+            [(expr.rhs.diff(s)*get_uncertainties(s))**2 for s in expr.rhs.free_symbols]
+        ))
+    )
+
+    return sympy.Eq(get_uncertainties(expr.lhs), _calculate_indirect_error(expr.rhs))
 
 
 def calculate_value_with_uncertainty(expr, val_dict):

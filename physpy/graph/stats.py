@@ -27,8 +27,11 @@ def format_output(fit_params, fit_params_error, chi2_red, p_val, degrees_of_free
     return "\n".join(output)
 
 
-def nsigma(v1, v2, v1_error, v2_error):
-    return abs(v1 - v2) / math.sqrt((v1_error) ** 2 + v2_error**2)
+def nsigma(v1, v2):
+    """
+    v1, v2 are tuples of the form (value, uncertainty)
+    """
+    return abs(v1[0] - v2[0]) / math.sqrt(v1[1] ** 2 + v2[1]**2)
 
 
 def nsigma_with_outer_value(name, outer_val, outer_val_error, param_index, value_index):

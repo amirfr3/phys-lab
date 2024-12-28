@@ -7,6 +7,7 @@ import sympy
 # from sympy.parsing.latex import parse_latex
 
 import physpy
+import sympy.printing
 
 
 DATASHEET_FOLDER = r"C:\Users\flami\OneDrive\School\SemA\LabA\Friction\results"
@@ -52,7 +53,7 @@ def main():
     v_0, v_f, g, x = sympy.symbols("v_0,v_f,g,x")
     mu_k_expr = sympy.Eq(sympy.symbols("mu_k"), -1 * (v_f ** 2 - v_0 ** 2) / 2*g*x)
     delta_mu_k_expr = physpy.equation.calculate_indirect_error_formula(mu_k_expr)
-    print(f"mu_k = {mu_k_expr}, dmu_k = {delta_mu_k_expr}")
+    print(f"{physpy.equation.latexify(mu_k_expr)}, {physpy.equation.latexify(delta_mu_k_expr)}")
 
     # Part B - Check energy conservation
     g_theo, dg_theo = 9.81, 0.1
@@ -65,7 +66,7 @@ def main():
     fit_p_expr = (1/(2*g)) * (1 + M/m) * v**2
     g_expr = sympy.Eq(g, ((fit_p_expr * g) / fit_p) / v**2)
     delta_g_expr = physpy.equation.calculate_indirect_error_formula(g_expr)
-    print(f"g = {g_expr.rhs}, dg = {delta_g_expr.rhs}")
+    print(f"{physpy.equation.latexify(g_expr)}, {physpy.equation.latexify(delta_g_expr)}")
 
     m_subs = {
         m: 0.12359,
@@ -95,7 +96,7 @@ def main():
 
     g_p = g_expr.rhs.subs(a_g_p_subs)
     dg_p = delta_g_expr.rhs.subs(a_g_p_subs)
-    print(f"Polynomial: Calculated g={g_p}+-{dg_p} (N_sigma={physpy.graph.nsigma(g_theo, dg_theo, g_p, dg_p)})")
+    print(f"Polynomial: Calculated g={g_p}+-{dg_p} ({(dg_p / g_p) * 100}%) (N_sigma={physpy.graph.nsigma((g_theo, dg_theo), (g_p, dg_p))})")
 
     v2 = pd.Series(
         [v**2 for v in vh_table["Velocity [m/sec]"]],
@@ -128,7 +129,7 @@ def main():
 
     g_l = g_expr.rhs.subs(a_g_l_subs)
     dg_l = delta_g_expr.rhs.subs(a_g_l_subs)
-    print(f"Linear: Calculated g={g_l}+-{dg_l} (N_sigma={physpy.graph.nsigma(g_theo, dg_theo, g_l, dg_l)})")
+    print(f"Linear: Calculated g={g_l}+-{dg_l} ({(dg_l / g_l) * 100}%) (N_sigma={physpy.graph.nsigma((g_theo, dg_theo), (g_l, dg_l))})")
 
 
 if __name__ == "__main__":

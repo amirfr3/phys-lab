@@ -7,6 +7,15 @@ name = "physpy"
 version = "0.0.1"
 description = "Physics Lab library"
 readme = "README.md"
+dependencies = [
+  "numpy",
+  "pandas",
+  "scipy",
+  "matplotlib",
+  "sympy",
+  "uncertainties"
+]
+
 
 [tool.hatch.build.targets.wheel]
 packages = ["physpy"]

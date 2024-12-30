@@ -8,8 +8,5 @@ version = "0.0.1"
 description = "Physics Lab library"
 readme = "README.md"
 
-[tool.hatch.version]
-path = "physpy/__init__.py"
-
 [tool.hatch.build.targets.wheel]
 packages = ["physpy"]

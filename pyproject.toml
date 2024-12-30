@@ -4,7 +4,9 @@ build-backend = "hatchling.build"
 
 [project]
 name = "physpy"
-dynamic = ["version"]
+version = "0.0.1"
+description = "Physics Lab library"
+readme = "README.md"
 
 [tool.hatch.version]
 path = "physpy/__init__.py"

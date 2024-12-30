@@ -100,7 +100,7 @@ def make_graph(
     if show:
         if debug_show:
             print(
-                f"=== EXAMPLE DATA FOR {graph_title_rtl} ===\n{processed_data["data"][:5]}\n================="
+                f"=== EXAMPLE DATA FOR {graph_title_rtl} ===\n{processed_data['data'][:5]}\n================="
             )
         print(processed_data["fit_results"])
         plt.show()

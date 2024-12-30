@@ -1,7 +1,7 @@
 # pip install uncertainties docx math2docx
 import uncertainties
-import docx
-import math2docx
+#import docx
+#import math2docx
 
 
 def add_math_to_tbl(row, name, dimension, value, error=None):

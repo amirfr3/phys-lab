@@ -74,6 +74,7 @@ def get_columns(data):
     delta_x = data.iloc[:, columns[1]]
     y = data.iloc[:, columns[2]]
     delta_y = data.iloc[:, columns[3]]
+
     return x, delta_x, y, delta_y
 
 

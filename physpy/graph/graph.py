@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 from .fit import fit_curve
 
@@ -70,12 +71,38 @@ def build_plot_with_residuals(data, plot_name):
     return plt
 
 
+def read_table(
+    file_path,
+    sheet_idx,
+):
+    data = pd.read_excel(file_path, sheet_name=sheet_idx)
+    return data
+
+
+def convert_units(
+    table,
+    src_col_name,
+    dst_col_name,
+    conversion_func,
+):
+    dst_col = table[src_col_name].apply(conversion_func).rename(dst_col_name)
+    table[src_col_name] = dst_col
+    table.rename(columns={src_col_name: dst_col_name}, inplace=True)
+    return table
+
+
+def flip_table_axis(table):
+    table = table[[table.columns[2], table.columns[3], table.columns[0], table.columns[1]]]
+    return table
+
+
 def make_graph(
     graph_title,
     table_or_file_path,
     sheet_idx,
     fit_func,
     initial_guesses,
+    output_folder=None,
     show=True,
     debug_show=False,
 ):
@@ -93,9 +120,11 @@ def make_graph(
 
     plt = build_plot_with_residuals(processed_data, graph_title_rtl)
 
-    with open(f"{graph_title}_stats.txt", "w") as f:
+    if not output_folder:
+        output_folder = "." # Default to current directory
+    with open(f"{output_folder}\\{graph_title}_stats.txt", "w") as f:
         f.write(processed_data["fit_results"])
-    plt.savefig(f"{graph_title}.png")
+    plt.savefig(f"{output_folder}\\{graph_title}.png")
 
     if show:
         if debug_show:

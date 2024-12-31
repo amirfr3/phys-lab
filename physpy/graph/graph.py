@@ -131,7 +131,7 @@ def make_graph(
             print(
                 f"=== EXAMPLE DATA FOR {graph_title_rtl} ===\n{processed_data["data"][:5]}\n================="
             )
-        print(processed_data["fit_results"])
+            print(processed_data["fit_results"])
         plt.show()
 
     return processed_data

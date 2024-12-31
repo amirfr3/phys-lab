@@ -71,6 +71,27 @@ def convert_mA_cols_to_A(table, col):
     table = physpy.graph.convert_units(table, f"delta_{col} [mA]", f"delta_{col} [A]", lambda x: x / 1000)
     return table
 
+
+def convert_voltage_current_table_to_resistance(table, voltage_col, current_col):
+    table = table.copy()
+    v_col = table[f"{voltage_col} [V]"]
+    delta_v_col = table[f"delta_{voltage_col} [V]"]
+    i_col = table[f"{current_col} [A]"]
+    delta_i_col = table[f"delta_{current_col} [A]"]
+
+    r_vals = []
+    dr_vals = []
+    for v, i, dv, di in zip(v_col, i_col, delta_v_col, delta_i_col):
+        r = v / i
+        dr = r * math.sqrt((dv / v) ** 2 + (di / i) ** 2)
+        r_vals.append(r)
+        dr_vals.append(dr)
+
+    r_series = pd.Series(r_vals, name="Resistance [Ohm]")
+    dr_series = pd.Series(dr_vals, name="delta_Resistance [Ohm]")
+    return pd.concat([r_series, dr_series], axis=1)
+
+
 def main():
     sympy.init_printing()
 
@@ -80,44 +101,17 @@ def main():
 
     # Part 0 - Choose correct circuit
     diff_table = physpy.graph.read_table(datasheet, "CircuitChoosing").iloc[:, :8]
-    # for col in ["I_a", "I_b"]:
-    #     diff_table = physpy.graph.convert_units(diff_table, f"stddev {col} [uA]", f"stddev {col} [mA]", lambda x: x / 1000)
-    # for col in ["V_a", "V_b"]:
-    #     diff_table = physpy.graph.convert_units(diff_table, f"stddev {col} [uV]", f"stddev {col} [V]", lambda x: x / 1000000)
-
 
     valerrs = []
     for col in ["I_a", "I_b"]:
         valerrs.extend(convert_value_stddev_current(diff_table, col))
-        # value_col = diff_table[f"{col} [mA]"]
-        # stddev_col = diff_table[f"stddev {col} [mA]"]
-        # valerrs.append(value_col)
-
-        # errs = []
-        # for value, stddev in zip(value_col, stddev_col):
-        #     value, error = calculate_error(value, stddev, MEASUREMENT_COUNT, *AMPEREMETER_INFO)
-        #     errs.append(error)
-        # valerrs.append(pd.Series(errs, name=f"delta_{col} [mA]"))
 
     for col in ["V_a", "V_b"]:
         valerrs.extend(convert_value_stddev_voltage(diff_table, col))
-        # value_col = diff_table[f"{col} [V]"]
-        # stddev_col = diff_table[f"stddev {col} [V]"]
-        # valerrs.append(value_col)
-
-        # errs = []
-        # for value, stddev in zip(value_col, stddev_col):
-        #     value, error = calculate_error(value, stddev, MEASUREMENT_COUNT, *VOLTMETER_INFO)
-        #     errs.append(error)
-        # valerrs.append(pd.Series(errs, name=f"delta_{col} [V]"))
 
     diff_table = pd.concat(valerrs, axis=1)
     diff_table = convert_mA_cols_to_A(diff_table, "I_a")
     diff_table = convert_mA_cols_to_A(diff_table, "I_b")
-    # diff_table = physpy.graph.convert_units(diff_table, "I_a [mA]", "I_a [A]", lambda x: x / 1000)
-    # diff_table = physpy.graph.convert_units(diff_table, "delta_I_a [mA]", "delta_I_a [A]", lambda x: x / 1000)
-    # diff_table = physpy.graph.convert_units(diff_table, "I_b [mA]", "I_b [A]", lambda x: x / 1000)
-    # diff_table = physpy.graph.convert_units(diff_table, "delta_I_b [mA]", "delta_I_b [A]", lambda x: x / 1000)
 
     # Part A - Calculate resistance of R1
     ohm_table = physpy.graph.read_table(datasheet, "OhmsLawData").iloc[:, :4]
@@ -127,15 +121,7 @@ def main():
     ohm_table = pd.concat(valerrs, axis=1)
     ohm_table = convert_mA_cols_to_A(ohm_table, "Current")
 
-    # TODO: UNITS!!!
-    # TODO: Make from value,stddev and convert to table with value,error,relerr
-
-    # ohm_table = physpy.graph.convert_units(ohm_table, "Current [mA]", "Current [A]", lambda x: x / 1000)
-    # ohm_table = physpy.graph.convert_units(ohm_table, "delta_Current [mA]", "delta_Current [A]", lambda x: x / 1000)
-    # print(ohm_table)
-
     inverse_ohm_table = physpy.graph.flip_table_axis(ohm_table)
-    print(inverse_ohm_table)
 
     # TODO: Calculate theoretical resistance according to table?
     direct_resistance = (98.32894, 0.006048797)
@@ -166,13 +152,17 @@ def main():
     print(f"Resistance of R1 (from inverse): {inv_resistance} - N_sigma = {physpy.graph.nsigma(direct_resistance, inv_resistance)}")
 
     # Part B - Calculate resistivity of wire
-    wire_diameter = (0.263, 0.000288675134594813) #mm
-    wire_radius = (wire_diameter[0] / 2, wire_diameter[1] / 2) #mm
-    wire_area = (math.pi * wire_radius[0] ** 2, 2 * math.pi * wire_radius[0] * wire_radius[1]) #mm^2
+    resistivity_table = physpy.graph.read_table(datasheet, "ResistanceLengthData").iloc[:, :6]
+    length_table = resistivity_table.iloc[:, :2]
+    resistivity_table = resistivity_table.iloc[:, 2:]
+    valerrs = []
+    valerrs.extend(convert_value_stddev_current(resistivity_table, "I"))
+    valerrs.extend(convert_value_stddev_voltage(resistivity_table, "V"))
+    resistivity_table = pd.concat(valerrs, axis=1)
+    resistivity_table = convert_mA_cols_to_A(resistivity_table, "I")
+    resistivity_table = convert_voltage_current_table_to_resistance(resistivity_table, "V", "I")
 
-    resistivity_table = physpy.graph.read_table(datasheet, "ResistanceLength").iloc[:, :4]
-
-    # TODO: UNITS!!!
+    resistivity_table = pd.concat([length_table, resistivity_table], axis=1)
 
     fit_data = physpy.graph.make_graph(
         "התנגדות מעגל הכולל נגד תיל כתלות באורך התיל",
@@ -183,10 +173,23 @@ def main():
         output_folder=results,
         show=should_show,
     )
-    resistivity_per_area = physpy.graph.extract_fit_param(fit_data, 1)
-    print(f"Resistivity per area: {resistivity_per_area}")
-    resistivity = (resistivity_per_area[0] * wire_area[0], resistivity_per_area[0] * wire_area[0] * math.sqrt((resistivity_per_area[1] / resistivity_per_area[0]) ** 2 + (wire_area[1] / wire_area[0]) ** 2))
-    print(f"Resistivity: {resistivity}")
+    resistance_per_meter = physpy.graph.extract_fit_param(fit_data, 1)
+    
+    # FUDGE_FACTOR__REMOVE__AAAA = 2
+    # resistance_per_meter = (resistance_per_meter[0] * FUDGE_FACTOR__REMOVE__AAAA, resistance_per_meter[1] * FUDGE_FACTOR__REMOVE__AAAA)
+
+    wire_diameter = (0.263, 0.000288675134594813) #mm
+    wire_radius = (wire_diameter[0] / 2, wire_diameter[1] / 2) #mm
+    wire_area = (math.pi * (wire_radius[0] ** 2), 2 * math.pi * wire_radius[0] * wire_radius[1]) #mm^2
+
+    resistivity = (resistance_per_meter[0] * wire_area[0], resistance_per_meter[0] * wire_area[0] * math.sqrt((resistance_per_meter[1] / resistance_per_meter[0]) ** 2 + (wire_area[1] / wire_area[0]) ** 2))
+
+    theo_resistivity = (1.1, 0)
+    theo_resistance_per_meter = (21.3, 0.5)
+
+    print(f"Resistance per meter: {resistance_per_meter} [Ohm/m] - N_sigma = {physpy.graph.nsigma(theo_resistance_per_meter, resistance_per_meter)}")
+    print(f"Area: {wire_area} [mm^2]")
+    print(f"Resistivity: {resistivity} [Ohm*mm^2/m] - N_sigma = {physpy.graph.nsigma(theo_resistivity, resistivity)}")
 
 
 if __name__ == "__main__":

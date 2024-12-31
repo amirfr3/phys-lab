@@ -78,7 +78,7 @@ def get_columns(data):
 
 
 def fit_curve(
-    fit_func, initial_guesses, table_or_file_path, sheet_idx=None, columns=[0, 1, 2, 3]
+    fit_func, initial_guesses, table_or_file_path, sheet_idx=None, columns=(0, 1, 2, 3)
 ):
     try:
         if sheet_idx is None:

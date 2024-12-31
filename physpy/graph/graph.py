@@ -78,6 +78,7 @@ def make_graph(
     initial_guesses,
     show=True,
     debug_show=False,
+    columns=(0,1,2,3)
 ):
     """
     graph_title: Title for graph (RTL)
@@ -89,7 +90,7 @@ def make_graph(
 
     # Reverse Hebrew RTL
     graph_title_rtl = graph_title[::-1]
-    processed_data = fit_curve(fit_func, initial_guesses, table_or_file_path, sheet_idx)
+    processed_data = fit_curve(fit_func, initial_guesses, table_or_file_path, sheet_idx, columns=columns)
 
     plt = build_plot_with_residuals(processed_data, graph_title_rtl)
 

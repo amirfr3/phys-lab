@@ -1,5 +1,5 @@
 import math
-from scipy import stats as stats_scipy
+import scipy
 import numpy as np
 
 
@@ -8,7 +8,7 @@ def calc_stats(x, y, fit_func, fit_params, output):
     degrees_of_freedom = len(x) - len(fit_params)
     chi2 = output.sum_square
     chi2_red = chi2 / degrees_of_freedom
-    p_val = stats_scipy.chi2.sf(chi2, degrees_of_freedom)
+    p_val = scipy.stats.chi2.sf(chi2, degrees_of_freedom)
     return residuals, degrees_of_freedom, chi2_red, p_val
 
 
@@ -33,34 +33,3 @@ def nsigma(v1, v2):
     """
     return abs(v1[0] - v2[0]) / math.sqrt(v1[1] ** 2 + v2[1]**2)
 
-
-def nsigma_with_outer_value(name, outer_val, outer_val_error, param_index, value_index):
-    if param_index is not None:
-
-        def nsigma_calc(fit_params, fit_params_error, values):
-            n = nsigma(
-                outer_val,
-                outer_val_error,
-                fit_params[param_index],
-                fit_params_error[param_index],
-            )
-            print(
-                f"nsigma {name}, {n} = {outer_val}+-{outer_val_error} / {fit_params[param_index]}+-{fit_params_error[param_index]}"
-            )
-            return (f"({name}) \\ \\ " + "N_{\\sigma}", None, n, None)
-
-    else:
-
-        def nsigma_calc(fit_params, fit_params_error, values):
-            n = nsigma(
-                outer_val,
-                outer_val_error,
-                values[value_index][2],
-                values[value_index][3],
-            )
-            print(
-                f"nsigma {name}, {n} = {outer_val}+-{outer_val_error} / {values[value_index][2]}+-{values[value_index][3]}"
-            )
-            return (f"({name}) \\ \\ " + "N_{\\sigma}", None, n, None)
-
-    return nsigma_calc

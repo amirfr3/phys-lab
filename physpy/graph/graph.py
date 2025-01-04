@@ -29,7 +29,7 @@ def build_plot_with_residuals(data, plot_name):
     )  # Change the label if needed
 
     # If you want to plot multiple functions, change here the relevant parameters (x, y, xerr, yerr, label). Otherwise, uncomment the 2 next lines:
-    # axs[0].errorbar(x + 0.2, y + 0.3, xerr=delta_x, yerr=delta_y, fmt='.g', label='Data', ecolor='gray')
+    # axs[0].errorbar(data["x"] + 0.2, data["y"] + 0.3, xerr=data["delta_x"], yerr=data["delta_y"], fmt='.g', label='Data', ecolor='gray')
     # axs[0].plot(x_fit + 0.2, y_fit + 0.3, label='Fit', c='k', alpha=0.5)
 
     axs[0].set_title(plot_name)  # Add here the full title for the fit

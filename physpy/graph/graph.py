@@ -4,7 +4,7 @@ from .fit import fit_curve
 from typing import Optional
 
 
-def build_plot_with_residuals(data, plot_name, xlabel: Optional[str]=None, ylabel: Optional[str]=None):
+def build_plot_with_residuals(data, plot_name, xsuffix: Optional[str]=None, ysuffix: Optional[str]=None):
     plt.close("all")
     fig, axs = plt.subplots(1, 2, figsize=(15, 6))
     plt.style.use("classic")
@@ -34,10 +34,10 @@ def build_plot_with_residuals(data, plot_name, xlabel: Optional[str]=None, ylabe
 
     axs[0].set_title(plot_name)  # Add here the full title for the fit
     axs[0].set_xlabel(
-        xlabel or f'{data["data"].columns[[data["columns"][0]]][0]}'
+        f'{data["data"].columns[[data["columns"][0]]][0]} {xsuffix}'
     )  # Change x-axis label if needed
     axs[0].set_ylabel(
-        ylabel or f'{data["data"].columns[[data["columns"][2]]][0]}'
+        f'{data["data"].columns[[data["columns"][2]]][0]} {ysuffix}'
     )  # Change y-axis label if needed
 
     axs[0].grid(True)
@@ -58,10 +58,10 @@ def build_plot_with_residuals(data, plot_name, xlabel: Optional[str]=None, ylabe
         " - גרף שארים"[::-1] + plot_name
     )  # Add here the full title for the residuals
     axs[1].set_xlabel(
-        f'{data["data"].columns[[data["columns"][0]]][0]}'
+        f'{data["data"].columns[[data["columns"][0]]][0]} {xsuffix}'
     )  # Change column names if needed
     axs[1].set_ylabel(
-        f'{data["data"].columns[[data["columns"][2]]][0]} - fit({data["data"].columns[[data["columns"][0]]][0]})'
+        f'{data["data"].columns[[data["columns"][2]]][0]} - fit({data["data"].columns[[data["columns"][0]]][0]}) {ysuffix}'
     )  # Change column names if needed
 
     axs[1].grid(True)
@@ -80,8 +80,8 @@ def make_graph(
     show=True,
     debug_show=False,
     columns=(0,1,2,3),
-    xlabel: Optional[str]=None,
-    ylabel: Optional[str]=None
+    xsuffix: Optional[str]=None,
+    ysuffix: Optional[str]=None
 ):
     """
     graph_title: Title for graph (RTL)
@@ -95,7 +95,7 @@ def make_graph(
     graph_title_rtl = graph_title[::-1]
     processed_data = fit_curve(fit_func, initial_guesses, table_or_file_path, sheet_idx, columns=columns)
 
-    plt = build_plot_with_residuals(processed_data, graph_title_rtl, xlabel=xlabel, ylabel=ylabel)
+    plt = build_plot_with_residuals(processed_data, graph_title_rtl, xsuffix=xsuffix, ysuffix=ysuffix)
 
     with open(f"{graph_title}_stats.txt", "w") as f:
         f.write(processed_data["fit_results"])

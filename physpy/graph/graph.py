@@ -1,9 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from .fit import fit_curve
+from typing import Optional
 
 
-def build_plot_with_residuals(data, plot_name):
+def build_plot_with_residuals(data, plot_name, xlabel: Optional[str]=None, ylabel: Optional[str]=None):
     plt.close("all")
     fig, axs = plt.subplots(1, 2, figsize=(15, 6))
     plt.style.use("classic")
@@ -33,10 +34,10 @@ def build_plot_with_residuals(data, plot_name):
 
     axs[0].set_title(plot_name)  # Add here the full title for the fit
     axs[0].set_xlabel(
-        f'{data["data"].columns[[data["columns"][0]]][0]}'
+        xlabel or f'{data["data"].columns[[data["columns"][0]]][0]}'
     )  # Change x-axis label if needed
     axs[0].set_ylabel(
-        f'{data["data"].columns[[data["columns"][2]]][0]}'
+        ylabel or f'{data["data"].columns[[data["columns"][2]]][0]}'
     )  # Change y-axis label if needed
 
     axs[0].grid(True)
@@ -78,7 +79,9 @@ def make_graph(
     initial_guesses,
     show=True,
     debug_show=False,
-    columns=(0,1,2,3)
+    columns=(0,1,2,3),
+    xlabel: Optional[str]=None,
+    ylabel: Optional[str]=None
 ):
     """
     graph_title: Title for graph (RTL)
@@ -92,7 +95,7 @@ def make_graph(
     graph_title_rtl = graph_title[::-1]
     processed_data = fit_curve(fit_func, initial_guesses, table_or_file_path, sheet_idx, columns=columns)
 
-    plt = build_plot_with_residuals(processed_data, graph_title_rtl)
+    plt = build_plot_with_residuals(processed_data, graph_title_rtl, xlabel=xlabel, ylabel=ylabel)
 
     with open(f"{graph_title}_stats.txt", "w") as f:
         f.write(processed_data["fit_results"])

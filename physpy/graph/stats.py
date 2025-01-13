@@ -8,7 +8,7 @@ def calc_stats(x, y, fit_func, fit_params, output):
 
     residuals = y - fit_func(fit_params, x)
     x_residuals = None
-    if not INVERSE_FUNCTION.get(fit_func):
+    if INVERSE_FUNCTION.get(fit_func):
         x_residuals = x - INVERSE_FUNCTION[fit_func](fit_params, y)
     degrees_of_freedom = len(x) - len(fit_params)
     chi2 = output.sum_square

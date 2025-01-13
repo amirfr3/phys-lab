@@ -9,7 +9,7 @@ def build_plot_with_residuals(data, plot_name, xsuffix: Optional[str]=None, ysuf
     plt.close("all")
     fig, axs = plt.subplots(1, 2, figsize=(15, 6))
     if show_y_residuals:
-        fig2, ax2 = plt.subplots(1, 1, figsize=(6, 6))
+        fig2, ax2 = plt.subplots(1, 1, figsize=(7, 6))
     plt.style.use("classic")
 
     fig.patch.set_facecolor("white")
@@ -60,7 +60,7 @@ def build_plot_with_residuals(data, plot_name, xsuffix: Optional[str]=None, ysuf
         ecolor="gray",
     )
     #axs[1].hlines(0, min(data["x"]), max(data["x"]), colors="r", linestyles="dashed")
-    axs[1].axhline(0, colors="r", linestyles="dashed")
+    axs[1].axhline(0, color="r", linestyle="dashed")
 
     axs[1].set_title(
         " - גרף שארים"[::-1] + plot_name
@@ -88,7 +88,7 @@ def build_plot_with_residuals(data, plot_name, xsuffix: Optional[str]=None, ysuf
             ecolor="gray",
         )
         #ax2.hlines(0, min(data["y"]), max(data["y"]), colors="r", linestyles="dashed")
-        ax2.axhline(0, colors="r", linestyles="dashed")
+        ax2.axhline(0, color="r", linestyle="dashed")
 
         ax2.set_title(
             " - גרף שארים בציר y"[::-1] + plot_name

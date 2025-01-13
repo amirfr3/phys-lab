@@ -2,9 +2,10 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from .fit import fit_curve
+from typing import Optional
 
 
-def build_plot_with_residuals(data, plot_name):
+def build_plot_with_residuals(data, plot_name, xsuffix: Optional[str]=None, ysuffix: Optional[str]=None):
     plt.close("all")
     fig, axs = plt.subplots(1, 2, figsize=(15, 6))
     plt.style.use("classic")
@@ -34,10 +35,10 @@ def build_plot_with_residuals(data, plot_name):
 
     axs[0].set_title(plot_name)  # Add here the full title for the fit
     axs[0].set_xlabel(
-        f'{data["data"].columns[[data["columns"][0]]][0]}'
+        f'{data["columns"][0]} {xsuffix}'
     )  # Change x-axis label if needed
     axs[0].set_ylabel(
-        f'{data["data"].columns[[data["columns"][2]]][0]}'
+        f'{data["columns"][2]} {ysuffix}'
     )  # Change y-axis label if needed
 
     axs[0].grid(True)
@@ -58,10 +59,10 @@ def build_plot_with_residuals(data, plot_name):
         " - גרף שארים"[::-1] + plot_name
     )  # Add here the full title for the residuals
     axs[1].set_xlabel(
-        f'{data["data"].columns[[data["columns"][0]]][0]}'
+        f'{data["columns"][0]} {xsuffix}'
     )  # Change column names if needed
     axs[1].set_ylabel(
-        f'{data["data"].columns[[data["columns"][2]]][0]} - fit({data["data"].columns[[data["columns"][0]]][0]})'
+        f'{data["columns"][2]} - fit({data["columns"][0]}) {ysuffix}'
     )  # Change column names if needed
 
     axs[1].grid(True)
@@ -105,6 +106,9 @@ def make_graph(
     output_folder=None,
     show=True,
     debug_show=False,
+    columns=(0,1,2,3),
+    xsuffix: Optional[str]=None,
+    ysuffix: Optional[str]=None
 ):
     """
     graph_title: Title for graph (RTL)
@@ -116,9 +120,9 @@ def make_graph(
 
     # Reverse Hebrew RTL
     graph_title_rtl = graph_title[::-1]
-    processed_data = fit_curve(fit_func, initial_guesses, table_or_file_path, sheet_idx)
+    processed_data = fit_curve(fit_func, initial_guesses, table_or_file_path, sheet_idx, columns=columns)
 
-    plt = build_plot_with_residuals(processed_data, graph_title_rtl)
+    plt = build_plot_with_residuals(processed_data, graph_title_rtl, xsuffix=xsuffix, ysuffix=ysuffix)
 
     if not output_folder:
         output_folder = "." # Default to current directory
@@ -129,7 +133,7 @@ def make_graph(
     if show:
         if debug_show:
             print(
-                f"=== EXAMPLE DATA FOR {graph_title_rtl} ===\n{processed_data["data"][:5]}\n================="
+                f"=== EXAMPLE DATA FOR {graph_title_rtl} ===\n{processed_data['data'][:5]}\n================="
             )
             print(processed_data["fit_results"])
         plt.show()

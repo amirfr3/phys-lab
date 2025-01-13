@@ -67,19 +67,18 @@ def remove_extremes(data_points, extremes):
             col.pop(extreme[0])
 
 
-def get_columns(data):
+def get_columns(data, columns):
     """Columns should be |X|delta_X|Y|delta_Y|"""
-    columns = [0, 1, 2, 3]
-    x = data.iloc[:, columns[0]]
-    delta_x = data.iloc[:, columns[1]]
-    y = data.iloc[:, columns[2]]
-    delta_y = data.iloc[:, columns[3]]
+    x = data[columns[0]]
+    delta_x = data[columns[1]]
+    y = data[columns[2]]
+    delta_y = data[columns[3]]
 
     return x, delta_x, y, delta_y
 
 
 def fit_curve(
-    fit_func, initial_guesses, table_or_file_path, sheet_idx=None, columns=[0, 1, 2, 3]
+    fit_func, initial_guesses, table_or_file_path, sheet_idx=None, columns=(0, 1, 2, 3)
 ):
     try:
         if sheet_idx is None:
@@ -88,7 +87,9 @@ def fit_curve(
     except ValueError:
         data = table_or_file_path
 
-    x, delta_x, y, delta_y = get_columns(data)
+    # Change column integers to column names.
+    columns = [data.columns.values[c] if isinstance(c, int) else c for c in columns]
+    x, delta_x, y, delta_y = get_columns(data, columns)
 
     fit_params, fit_params_error, fit_cov, output = odr_fit(
         fit_func, initial_guesses, x, delta_x, y, delta_y

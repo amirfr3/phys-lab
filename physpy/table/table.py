@@ -8,12 +8,12 @@ def _read_params(params):
 
 
 def parse_data(filepath):
-    fit_tables = []
+    fit_tables = {}
     params = None
     with pd.ExcelFile(filepath) as xl:
         for sheet in xl.sheet_names:
             if sheet.endswith('_fit'):
-                fit_tables.append(pd.read_excel(xl, sheet))
+                fit_tables[sheet.replace('_fit', '')] = pd.read_excel(xl, sheet)
         if sheet.lower() == 'params':
             params = pd.read_excel(xl, sheet)
 

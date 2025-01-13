@@ -34,10 +34,10 @@ def build_plot_with_residuals(data, plot_name, xsuffix: Optional[str]=None, ysuf
 
     axs[0].set_title(plot_name)  # Add here the full title for the fit
     axs[0].set_xlabel(
-        f'{data["data"].columns[[data["columns"][0]]][0]} {xsuffix}'
+        f'{data["columns"][0]} {xsuffix}'
     )  # Change x-axis label if needed
     axs[0].set_ylabel(
-        f'{data["data"].columns[[data["columns"][2]]][0]} {ysuffix}'
+        f'{data["columns"][2]} {ysuffix}'
     )  # Change y-axis label if needed
 
     axs[0].grid(True)
@@ -58,10 +58,10 @@ def build_plot_with_residuals(data, plot_name, xsuffix: Optional[str]=None, ysuf
         " - גרף שארים"[::-1] + plot_name
     )  # Add here the full title for the residuals
     axs[1].set_xlabel(
-        f'{data["data"].columns[[data["columns"][0]]][0]} {xsuffix}'
+        f'{data["columns"][0]} {xsuffix}'
     )  # Change column names if needed
     axs[1].set_ylabel(
-        f'{data["data"].columns[[data["columns"][2]]][0]} - fit({data["data"].columns[[data["columns"][0]]][0]}) {ysuffix}'
+        f'{data["columns"][2]} - fit({data["columns"][0]}) {ysuffix}'
     )  # Change column names if needed
 
     axs[1].grid(True)

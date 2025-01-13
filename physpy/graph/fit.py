@@ -69,7 +69,6 @@ def remove_extremes(data_points, extremes):
 
 def get_columns(data, columns):
     """Columns should be |X|delta_X|Y|delta_Y|"""
-    columns = [data.columns.values[c] if isinstance(c, int) else c for c in columns]
     x = data[columns[0]]
     delta_x = data[columns[1]]
     y = data[columns[2]]
@@ -87,6 +86,7 @@ def fit_curve(
     except ValueError:
         data = table_or_file_path
 
+    columns = [data.columns.values[c] if isinstance(c, int) else c for c in columns]
     x, delta_x, y, delta_y = get_columns(data, columns)
 
     fit_params, fit_params_error, fit_cov, output = odr_fit(

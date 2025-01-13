@@ -9,12 +9,15 @@ def build_plot_with_residuals(data, plot_name, xsuffix: Optional[str]=None, ysuf
     plt.close("all")
     fig, axs = plt.subplots(1, 2, figsize=(15, 6))
     if show_y_residuals:
-        fig2, ax2 = plt.plot(figsize=(7.5, 6))
+        fig.patch.set_facecolor("white")
     plt.style.use("classic")
 
     fig.patch.set_facecolor("white")
     for ax in axs:
         ax.set_facecolor("white")
+    if show_y_residuals:
+        fig2.patch.set_facecolor("white")
+        ax2[0].set_facecolor("white")
 
     x_fit = np.linspace(min(data["x"]), max(data["x"]), 10 * len(data["x"]))
     y_fit = data["fit_func"](data["fit_params"], x_fit)
@@ -73,7 +76,7 @@ def build_plot_with_residuals(data, plot_name, xsuffix: Optional[str]=None, ysuf
         if data['x_residuals'] is None:
             raise TypeError('No inverse function for the chosen fit function. consider defining it and adding it to to INVERSE_FUNCTION dict.')
 
-        ax2.errorbar(
+        ax2[0].errorbar(
             data["y"],
             data["x_residuals"],
             xerr=data["delta_y"],
@@ -82,19 +85,19 @@ def build_plot_with_residuals(data, plot_name, xsuffix: Optional[str]=None, ysuf
             label="Data",
             ecolor="gray",
         )
-        ax2.hlines(0, min(data["x"]), max(data["x"]), colors="r", linestyles="dashed")
+        ax2[0].hlines(0, min(data["x"]), max(data["x"]), colors="r", linestyles="dashed")
 
-        ax2.set_title(
+        ax2[0].set_title(
             " - גרף שארים בציר y"[::-1] + plot_name
         )  # Add here the full title for the residuals
-        ax2.set_xlabel(
+        ax2[0].set_xlabel(
             f'{data["columns"][2]} {ysuffix}'
         )  # Change column names if needed
-        ax2.set_ylabel(
+        ax2[0].set_ylabel(
             f'{data["columns"][0]} - fit^-1({data["columns"][2]}) {xsuffix}'
         )  # Change column names if needed
 
-        ax2.grid(True)
+        ax2[0].grid(True)
 
     plt.tight_layout()
     return plt

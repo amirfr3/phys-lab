@@ -70,10 +70,10 @@ def remove_extremes(data_points, extremes):
 def get_columns(data, columns):
     """Columns should be |X|delta_X|Y|delta_Y|"""
     columns = [data.columns.values[c] if isinstance(c, int) else c for c in columns]
-    x = data.iloc[:, columns[0]]
-    delta_x = data.iloc[:, columns[1]]
-    y = data.iloc[:, columns[2]]
-    delta_y = data.iloc[:, columns[3]]
+    x = data[columns[0]]
+    delta_x = data[columns[1]]
+    y = data[columns[2]]
+    delta_y = data[columns[3]]
     return x, delta_x, y, delta_y
 
 

@@ -1,10 +1,11 @@
 import math
 import scipy
 import numpy as np
-from .fit import INVERSE_FUNCTION
 
 
 def calc_stats(x, y, fit_func, fit_params, output):
+    from .fit import INVERSE_FUNCTION
+
     residuals = y - fit_func(fit_params, x)
     x_residuals = None
     if not INVERSE_FUNCTION.get(fit_func):

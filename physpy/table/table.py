@@ -1,11 +1,17 @@
 import pandas as pd
 
 
-def _read_params(params):
-    # Add values to global namespace
-    for name, series in params.items():
-        globals()["P_" + name] = tuple(series.to_numpy()[:2])  # )
+def _parse_params(param_table):
+    params = {}
+    for param in param_table.columns.values:
+        # Find errors - Currently disabled
+        #error=None
+        #for p in param_table.columns.values:
+        #    if p.startwith("d"+param.split[0]):
+        #        error = p
+        params[param.split()[0]] = param_table[param][0] if len(param_table[param]) == 1 else param_table[param]
 
+    return params
 
 def parse_data(filepath):
     fit_tables = {}
@@ -17,5 +23,4 @@ def parse_data(filepath):
         if sheet.lower() == 'params':
             params = pd.read_excel(xl, sheet)
 
-    _read_params(params)
-    return fit_tables
+    return fit_tables, _parse_params(params)

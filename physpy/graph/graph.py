@@ -5,11 +5,15 @@ from .fit import fit_curve
 from typing import Optional
 
 
+def _suffix(s):
+    return ' {s}' if s is not None else ''
+
+
 def build_plot_with_residuals(data, plot_name, xsuffix: Optional[str]=None, ysuffix: Optional[str]=None, show_y_residuals=False):
     plt.close("all")
     fig, axs = plt.subplots(1, 2, figsize=(15, 6))
     if show_y_residuals:
-        fig2, ax2 = plt.subplots(1, 1, figsize=(6, 6))
+        fig2, ax2 = plt.subplots(1, 1, figsize=(7, 6))
     plt.style.use("classic")
 
     fig.patch.set_facecolor("white")
@@ -41,10 +45,10 @@ def build_plot_with_residuals(data, plot_name, xsuffix: Optional[str]=None, ysuf
 
     axs[0].set_title(plot_name)  # Add here the full title for the fit
     axs[0].set_xlabel(
-        f'{data["columns"][0]} {xsuffix}'
+        f'{data["columns"][0]}' + _suffix(xsuffix)
     )  # Change x-axis label if needed
     axs[0].set_ylabel(
-        f'{data["columns"][2]} {ysuffix}'
+        f'{data["columns"][2]}' + _suffix(ysuffix)
     )  # Change y-axis label if needed
 
     axs[0].grid(True)
@@ -66,11 +70,9 @@ def build_plot_with_residuals(data, plot_name, xsuffix: Optional[str]=None, ysuf
         " - גרף שארים"[::-1] + plot_name
     )  # Add here the full title for the residuals
     axs[1].set_xlabel(
-        f'{data["columns"][0]} {xsuffix}'
-    )  # Change column names if needed
+        f'{data["columns"][0]}' + _suffix(xsuffix))  # Change column names if needed
     axs[1].set_ylabel(
-        f'{data["columns"][2]} - fit({data["columns"][0]}) {ysuffix}'
-    )  # Change column names if needed
+        f'{data["columns"][2]} - fit({data["columns"][0]})' + _suffix(ysuffix))  # Change column names if needed
 
     axs[1].grid(True)
     # axs[1].legend()
@@ -94,11 +96,10 @@ def build_plot_with_residuals(data, plot_name, xsuffix: Optional[str]=None, ysuf
             " - גרף שארים בציר y"[::-1] + plot_name
         )  # Add here the full title for the residuals
         ax2.set_xlabel(
-            f'{data["columns"][2]} {ysuffix}'
+            f'{data["columns"][2]}' + _suffix(ysuffix)
         )  # Change column names if needed
         ax2.set_ylabel(
-            f'{data["columns"][0]} - fit^-1({data["columns"][2]}) {xsuffix}'
-        )  # Change column names if needed
+            f'{data["columns"][0]} - fit^-1({data["columns"][2]})' + _suffix(xsuffix))  # Change column names if needed
 
         ax2.grid(True)
 

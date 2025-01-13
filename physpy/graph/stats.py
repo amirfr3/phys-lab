@@ -15,9 +15,12 @@ def calc_stats(x, y, fit_func, fit_params, output):
 def format_output(fit_params, fit_params_error, chi2_red, p_val, degrees_of_freedom):
     output = []
     for i in range(len(fit_params)):
-        output.append(
-            f"a[{i}]: {fit_params[i]} \u00B1 {fit_params_error[i]} ({(abs(fit_params_error[i]/fit_params[i]))*100}% error)"
-        )
+        if fit_params[i] == 0:
+            output.append(f"a[{i}]: {fit_params[i]} \u00B1 {fit_params_error[i]} (NO RELATIVE ERROR)")
+        else:
+            output.append(
+                f"a[{i}]: {fit_params[i]} \u00B1 {fit_params_error[i]} ({(abs(fit_params_error[i]/fit_params[i]))*100}% error)"
+            )
     output.append(
         f"chi squared reduced = {chi2_red:.5f} \u00B1 {np.sqrt(2/degrees_of_freedom)}"
     )

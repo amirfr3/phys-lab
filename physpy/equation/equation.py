@@ -15,6 +15,14 @@ def get_uncertainties(symbols):
     return _get_uncertainty(symbols)
 
 
+def get_symbols_with_uncertainties(symbols_str):
+    symbols = sympy.symbols(symbols_str)
+    uncertainties = get_uncertainties(symbols)
+
+    # Return each symbol with its uncertainty
+    return zip(symbols, uncertainties) 
+
+
 class UnsupportedOperationError(KeyError):
     pass
 

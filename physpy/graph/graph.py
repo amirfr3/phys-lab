@@ -136,3 +136,6 @@ def make_graph(
 
     return processed_data
 
+
+def calc_inst_error(res):
+    return res/np.sqrt(12)

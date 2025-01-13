@@ -15,6 +15,10 @@ def linear(A, x):
     return A[1] * x + A[0]
 
 
+def _linear_inverse(A, y):
+    return y/A[1] - A[0]/A[1]
+
+
 def polynomial(A, x):
     return A[2] * x**2 + A[1] * x + A[0]
 
@@ -29,6 +33,9 @@ def exponential(A, x):
 
 def sinusoidal(A, x):
     return A[3] * np.sin(A[1] * x + A[2]) + A[0]
+
+
+INVERSE_FUNCTION = {linear: _linear_inverse}
 
 
 # === Fit function === #
@@ -94,7 +101,7 @@ def fit_curve(
     fit_params, fit_params_error, fit_cov, output = odr_fit(
         fit_func, initial_guesses, x, delta_x, y, delta_y
     )
-    residuals, degrees_of_freedom, chi2_red, p_val = calc_stats(
+    residuals, degrees_of_freedom, chi2_red, p_val, x_residuals = calc_stats(
         x, y, fit_func, fit_params, output
     )
 
@@ -116,6 +123,7 @@ def fit_curve(
         "fit_cov": fit_cov,
         "output": output,
         "residuals": residuals,
+        "x_residuals": x_residuals,
         "dof": degrees_of_freedom,
         "chi2_red": chi2_red,
         "p_val": p_val,

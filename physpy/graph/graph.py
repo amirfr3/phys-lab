@@ -5,9 +5,11 @@ from .fit import fit_curve
 from typing import Optional
 
 
-def build_plot_with_residuals(data, plot_name, xsuffix: Optional[str]=None, ysuffix: Optional[str]=None):
+def build_plot_with_residuals(data, plot_name, xsuffix: Optional[str]=None, ysuffix: Optional[str]=None, show_y_residuals=False):
     plt.close("all")
     fig, axs = plt.subplots(1, 2, figsize=(15, 6))
+    if show_y_residuals:
+        fig2, ax2 = plt.plot(figsize=(7.5, 6))
     plt.style.use("classic")
 
     fig.patch.set_facecolor("white")
@@ -67,6 +69,32 @@ def build_plot_with_residuals(data, plot_name, xsuffix: Optional[str]=None, ysuf
 
     axs[1].grid(True)
     # axs[1].legend()
+    if show_y_residuals:
+        if data['x_residuals'] is None:
+            raise TypeError('No inverse function for the chosen fit function. consider defining it and adding it to to INVERSE_FUNCTION dict.')
+
+        ax2.errorbar(
+            data["y"],
+            data["x_residuals"],
+            xerr=data["delta_y"],
+            yerr=data["delta_x"],
+            fmt=".b",
+            label="Data",
+            ecolor="gray",
+        )
+        ax2.hlines(0, min(data["x"]), max(data["x"]), colors="r", linestyles="dashed")
+
+        ax2.set_title(
+            " - גרף שארים בציר y"[::-1] + plot_name
+        )  # Add here the full title for the residuals
+        ax2.set_xlabel(
+            f'{data["columns"][2]} {ysuffix}'
+        )  # Change column names if needed
+        ax2.set_ylabel(
+            f'{data["columns"][0]} - fit^-1({data["columns"][2]}) {xsuffix}'
+        )  # Change column names if needed
+
+        ax2.grid(True)
 
     plt.tight_layout()
     return plt
@@ -108,7 +136,8 @@ def make_graph(
     debug_show=False,
     columns=(0,1,2,3),
     xsuffix: Optional[str]=None,
-    ysuffix: Optional[str]=None
+    ysuffix: Optional[str]=None,
+    show_y_residuals=False
 ):
     """
     graph_title: Title for graph (RTL)
@@ -122,7 +151,7 @@ def make_graph(
     graph_title_rtl = graph_title[::-1]
     processed_data = fit_curve(fit_func, initial_guesses, table_or_file_path, sheet_idx, columns=columns)
 
-    plt = build_plot_with_residuals(processed_data, graph_title_rtl, xsuffix=xsuffix, ysuffix=ysuffix)
+    plt = build_plot_with_residuals(processed_data, graph_title_rtl, xsuffix=xsuffix, ysuffix=ysuffix, show_y_residuals=show_y_residuals)
 
     if not output_folder:
         output_folder = "." # Default to current directory

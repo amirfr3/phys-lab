@@ -72,7 +72,7 @@ def build_plot_with_residuals(data, plot_name, xsuffix: Optional[str]=None, ysuf
     axs[1].set_xlabel(
         f'{data["columns"][0]}' + _suffix(xsuffix))  # Change column names if needed
     axs[1].set_ylabel(
-        f'{data["columns"][2]} - fit({data["columns"][0]})' + _suffix(ysuffix))  # Change column names if needed
+        f'{data["columns"][2]} - fit({data["columns"][0].split()[0]})' + _suffix(ysuffix))  # Change column names if needed
 
     axs[1].grid(True)
     # axs[1].legend()
@@ -99,7 +99,7 @@ def build_plot_with_residuals(data, plot_name, xsuffix: Optional[str]=None, ysuf
             f'{data["columns"][2]}' + _suffix(ysuffix)
         )  # Change column names if needed
         ax2.set_ylabel(
-            f'{data["columns"][0]} - fit^-1({data["columns"][2]})' + _suffix(xsuffix))  # Change column names if needed
+            f'${data["columns"][0]} - fit^-1({data["columns"][2].split()[0]})$' + _suffix(xsuffix))  # Change column names if needed
 
         ax2.grid(True)
 

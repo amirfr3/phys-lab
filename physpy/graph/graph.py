@@ -4,18 +4,18 @@ import matplotlib.pyplot as plt
 from .fit import fit_curve
 from typing import Optional
 
-global SINGLE_PICTURE_GRAPHS
-SINGLE_PICTURE_GRAPHS = False
+_SINGLE_PICTURE_GRAPHS = False
 
+def single_picture_graphs(b: bool):
+    _SINGLE_PICTURE_GRAPHS = b
 
 def _suffix(s):
     return ' {s}' if s is not None else ''
 
 
 def build_plot_with_residuals(data, plot_name, xsuffix: Optional[str]=None, ysuffix: Optional[str]=None, show_x_residuals=False):
-    global SINGLE_PICTURE_GRAPHS
     plt.close("all")
-    if SINGLE_PICTURE_GRAPHS:
+    if _SINGLE_PICTURE_GRAPHS:
         fig1, axs = plt.subplots(1, 2, figsize=(15, 6))
         figs = [fig1]
     else:

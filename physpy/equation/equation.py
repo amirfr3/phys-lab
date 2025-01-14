@@ -134,10 +134,10 @@ def latexify_and_round_fit_params(fit_params, fit_params_error, chi, dof, p_prob
     units += [None]*(len(fit_params)-len(units))
 
     for i, (param, error, unit) in enumerate(zip(fit_params, fit_params_error, units)):
-        latex_str += latexify_value('a_{i}', param, units=unit)
+        latex_str += latexify_and_round_value('a_{i}', param, units=unit)
     
-    latex_str += latexify_value('\\chi^2_{red}', chi, math.sqrt(2/dof))
-    latex_str += latexify_value('P_{prob}', p_prob)
+    latex_str += latexify_and_round_value('\\chi^2_{red}', chi, math.sqrt(2/dof))
+    latex_str += latexify_and_round_value('P_{prob}', p_prob)
 
     return latex_str
 

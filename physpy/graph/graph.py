@@ -5,23 +5,40 @@ from .fit import fit_curve
 from typing import Optional
 
 
+SINGLE_PICTURE_GRAPHS = False
+
+
 def _suffix(s):
     return ' {s}' if s is not None else ''
 
 
 def build_plot_with_residuals(data, plot_name, xsuffix: Optional[str]=None, ysuffix: Optional[str]=None, show_x_residuals=False):
     plt.close("all")
-    fig, axs = plt.subplots(1, 2, figsize=(15, 6))
+    if SINGLE_PICTURE_GRAPHS:
+        fig1, axs = plt.subplots(1, 2, figsize=(15, 6))
+        figs = [fig1]
+    else:
+        figs = []
+        axs = []
+        fig1, ax1 = plt.subplots(1, 1, figsize=(8,6))
+        figs.append(fig1)
+        axs.append(ax1)
+        fig1, ax1 = plt.subplots(1, 1, figsize=(8,6))
+        figs.append(fig1)
+        axs.append(ax1)
+
     if show_x_residuals:
         fig2, ax2 = plt.subplots(1, 1, figsize=(7, 6))
+        figs.append(fig2)
+
     plt.style.use("classic")
 
-    fig.patch.set_facecolor("white")
+    for fig in figs:
+        fig.patch.set_facecolor("white")
+
     for ax in axs:
         ax.set_facecolor("white")
     if show_x_residuals:
-        fig2.patch.set_facecolor("white")
-        fig2.patch.set_facecolor("white")
         ax2.set_facecolor("white")
 
     x_fit = np.linspace(min(data["x"]), max(data["x"]), 10 * len(data["x"]))

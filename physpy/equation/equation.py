@@ -115,7 +115,7 @@ def _round_value(value, error):
     return float(v), float(e)
 
 def _round_number(value):
-    v, _ = f"{ufloat(value, 10**math.floor(math.log(value, 10)))}".split('+/-')
+    v, _ = f"{ufloat(value, 10**math.floor(math.log(value, 10))):2u}".split('+/-')
     return float(v)
 
 def latexify_and_round_value(name, value, error=0, units=None, no_relative_error=False):

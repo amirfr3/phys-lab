@@ -79,7 +79,7 @@ def build_plot_with_residuals(data, plot_name, xsuffix: Optional[str]=None, ysuf
             raise TypeError('No inverse function for the chosen fit function. consider defining it and adding it to to INVERSE_FUNCTION dict.')
 
         plt.figure(2)
-        fig2, ax2 = plt.subplots(1, 1, figsize=(7, 6))
+        fig2, ax2 = plt.subplots(1, 1, figsize=(7.5, 6))
 
         fig2.patch.set_facecolor("white")
         fig2.patch.set_facecolor("white")

@@ -13,6 +13,7 @@ def _suffix(s):
 
 
 def build_plot_with_residuals(data, plot_name, xsuffix: Optional[str]=None, ysuffix: Optional[str]=None, show_x_residuals=False):
+    global SINGLE_PICTURE_GRAPHS
     plt.close("all")
     if SINGLE_PICTURE_GRAPHS:
         fig1, axs = plt.subplots(1, 2, figsize=(15, 6))

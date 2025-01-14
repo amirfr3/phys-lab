@@ -45,10 +45,10 @@ def build_plot_with_residuals(data, plot_name, xsuffix: Optional[str]=None, ysuf
 
     axs[0].set_title(plot_name)  # Add here the full title for the fit
     axs[0].set_xlabel(
-        f'{data["columns"][0]}' + _suffix(xsuffix)
+        f'${data["columns"][0].split()[0]}\\:{data["columns"][0].split()[1]}' + _suffix(xsuffix) + '$'
     )  # Change x-axis label if needed
     axs[0].set_ylabel(
-        f'{data["columns"][2]}' + _suffix(ysuffix)
+        f'${data["columns"][2].split()[0]}\\:{data["columns"][2].split()[1]}' + _suffix(ysuffix) + '$'
     )  # Change y-axis label if needed
 
     axs[0].grid(True)
@@ -69,10 +69,14 @@ def build_plot_with_residuals(data, plot_name, xsuffix: Optional[str]=None, ysuf
     axs[1].set_title(
         " - גרף שארים"[::-1] + plot_name
     )  # Add here the full title for the residuals
+
+    x_label = "\\:".join(data["columns"][0].split())
     axs[1].set_xlabel(
-        f'{data["columns"][0]}' + _suffix(xsuffix))  # Change column names if needed
+        f'${x_label}' + _suffix(xsuffix) + '$'
+    )  # Change column names if needed
     axs[1].set_ylabel(
-        f'{data["columns"][2]} - fit({data["columns"][0].split()[0]})' + _suffix(ysuffix))  # Change column names if needed
+        f'${data["columns"][2].split()[0]} - fit^{{-1}}\\left({data["columns"][1].split()[0]}\\right)'+ f'\\:{data["columns"][2].split()[1]}' + _suffix(ysuffix) + '$'
+    )
 
     axs[1].grid(True)
     # axs[1].legend()
@@ -95,12 +99,13 @@ def build_plot_with_residuals(data, plot_name, xsuffix: Optional[str]=None, ysuf
         ax2.set_title(
             " - גרף שארים בציר x"[::-1] + plot_name
         )  # Add here the full title for the residuals
-        x_label = data["columns"][2].replace(" ", "\\:")
+        x_label = "\\:".join(data["columns"][2].split())
         ax2.set_xlabel(
-            f'${x_label}$' + _suffix(ysuffix)
+            f'${x_label}' + _suffix(ysuffix) + '$'
         )  # Change column names if needed
         ax2.set_ylabel(
-            f'${data["columns"][0].split()[0]} - fit^{{-1}}\\left({data["columns"][2].split()[0]}\\right)'+ f'\\:{data["columns"][0].split()[1]}' + _suffix(xsuffix) + '$') # Change column names if needed
+            f'${data["columns"][0].split()[0]} - fit^{{-1}}\\left({data["columns"][2].split()[0]}\\right)'+ f'\\:{data["columns"][0].split()[1]}' + _suffix(xsuffix) + '$'
+        ) # Change column names if needed
 
         ax2.grid(True)
 

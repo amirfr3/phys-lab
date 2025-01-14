@@ -11,20 +11,12 @@ def _suffix(s):
 
 def build_plot_with_residuals(data, plot_name, xsuffix: Optional[str]=None, ysuffix: Optional[str]=None, show_x_residuals=False):
     plt.close("all")
-    plt.figure(1)
     fig, axs = plt.subplots(1, 2, figsize=(15, 6))
-    if show_x_residuals:
-        plt.figure(2)
-        fig2, ax2 = plt.subplots(1, 1, figsize=(7, 6))
     plt.style.use("classic")
 
     fig.patch.set_facecolor("white")
     for ax in axs:
         ax.set_facecolor("white")
-    if show_x_residuals:
-        fig2.patch.set_facecolor("white")
-        fig2.patch.set_facecolor("white")
-        ax2.set_facecolor("white")
 
     x_fit = np.linspace(min(data["x"]), max(data["x"]), 10 * len(data["x"]))
     y_fit = data["fit_func"](data["fit_params"], x_fit)
@@ -85,6 +77,13 @@ def build_plot_with_residuals(data, plot_name, xsuffix: Optional[str]=None, ysuf
     if show_x_residuals:
         if data['x_residuals'] is None:
             raise TypeError('No inverse function for the chosen fit function. consider defining it and adding it to to INVERSE_FUNCTION dict.')
+
+        plt.figure(2)
+        fig2, ax2 = plt.subplots(1, 1, figsize=(7, 6))
+
+        fig2.patch.set_facecolor("white")
+        fig2.patch.set_facecolor("white")
+        ax2.set_facecolor("white")
 
         ax2.errorbar(
             data["y"],

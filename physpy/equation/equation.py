@@ -122,6 +122,11 @@ def _round_number(value):
 
 
 def _latexify_value(name, value, error, units, no_relative_error):
+    if str(value.endswith(".0")):
+        value = str(int(value))
+    if str(error).endswith(".0"):
+        error = str(int(error))
+
     latex_str = f'{name} = \\SI' + f'{{{value}({error})}}' + '{' + (units if units is not None else '') + '}' 
     if not no_relative_error and error != 0:
         p = _round_number((error/value)*100)

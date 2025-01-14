@@ -113,7 +113,7 @@ def latexify(expr):
 
 def _round_value(value, error):
     v, e = f"{ufloat(value, error):.2u}".split('+/-')
-    return float(v), float(e)
+    return float(v), float(e), 
 
 
 def _round_number(value):
@@ -121,23 +121,23 @@ def _round_number(value):
     return float(v)
 
 
-def _latexify_value(name, value, error, units, no_relative_error):
+def _latexify_value(name, value, error, relative_error, units):
     if str(value).endswith(".0"):
-        value = str(int(value))
+        value = int(value)
     if str(error).endswith(".0"):
-        error = str(int(error))
+        error = int(error)
 
     latex_str = f'{name} = \\SI' + f'{{{value}({error})}}' + '{' + (units if units is not None else '') + '}' 
-    if not no_relative_error and error != 0:
-        p = _round_number((error/value)*100)
-        latex_str += '\\,' + f'({p}\\%)'
+    if relative_error is not None:
+        latex_str += '\\,' + f'({relative_error}\\%)'
     return latex_str
 
 
 def latexify_and_round_value(name, value, error=0, units=None, no_relative_error=False):
     # Currently need to supply the latex unit yourself.
     v, e = _round_value(value, error) if error != 0 else (_round_number(value), 0)
-    return _latexify_value(name, v, e, units, no_relative_error)
+    p = _round_number((error/value)*100)
+    return _latexify_value(name, v, e, units)
 
 
 def latexify_and_round_fit_params(fit_data, units=None):

@@ -11,8 +11,10 @@ def _suffix(s):
 
 def build_plot_with_residuals(data, plot_name, xsuffix: Optional[str]=None, ysuffix: Optional[str]=None, show_x_residuals=False):
     plt.close("all")
+    plt.figure(1)
     fig, axs = plt.subplots(1, 2, figsize=(15, 6))
     if show_x_residuals:
+        plt.figure(2)
         fig2, ax2 = plt.subplots(1, 1, figsize=(7, 6))
     plt.style.use("classic")
 
@@ -75,7 +77,7 @@ def build_plot_with_residuals(data, plot_name, xsuffix: Optional[str]=None, ysuf
         f'${x_label}' + _suffix(xsuffix) + '$'
     )  # Change column names if needed
     axs[1].set_ylabel(
-        f'${data["columns"][2].split()[0]} - fit^{{-1}}\\left({data["columns"][1].split()[0]}\\right)'+ f'\\:{data["columns"][2].split()[1]}' + _suffix(ysuffix) + '$'
+        f'${data["columns"][2].split()[0]} - fit^{{-1}}\\left({data["columns"][0].split()[0]}\\right)'+ f'\\:{data["columns"][2].split()[1]}' + _suffix(ysuffix) + '$'
     )
 
     axs[1].grid(True)

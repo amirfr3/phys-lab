@@ -141,6 +141,15 @@ def latexify_and_round_fit_params(fit_data, units=None):
 
     return latex_str
 
+def latexify_nsigma(nsigma, val1=None, val2=None):
+    extra_under = ""
+    if val1 is not None:
+        extra_under += f",\\:{val1}"
+        if val2 is not None:
+            extra_under += f",\\:{val2}"
+        
+    return latexify_and_round_value("N_{\\sigma" + extra_under + "}", nsigma, no_relative_error=True)
+
 def calculate_value_with_uncertainty(expr, val_dict):
     # Get symbols
     # Get uncertainties symbols

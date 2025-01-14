@@ -96,10 +96,10 @@ def build_plot_with_residuals(data, plot_name, xsuffix: Optional[str]=None, ysuf
             " - גרף שארים בציר x"[::-1] + plot_name
         )  # Add here the full title for the residuals
         ax2.set_xlabel(
-            f'{data["columns"][2]}' + _suffix(ysuffix)
+            f'${data["columns"][2].replace(" ", "\\:")}$' + _suffix(ysuffix)
         )  # Change column names if needed
         ax2.set_ylabel(
-            f'${data["columns"][0]} - fit^-1({data["columns"][2].split()[0]})$' + _suffix(xsuffix))  # Change column names if needed
+            f'${data["columns"][0].split()[0]} - fit^{{-1}}\\left({data["columns"][2].split()[0]}\\right)'+ f'\\:{data["columns"][0].split()[1]}' + _suffix(xsuffix)) + '$' # Change column names if needed
 
         ax2.grid(True)
 

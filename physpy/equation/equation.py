@@ -126,6 +126,8 @@ def _latexify_value(name, value, error, relative_error, units):
         value = int(value)
     if str(error).endswith(".0"):
         error = int(error)
+    if str(relative_error).endswith(".0"):
+        relative_error = int(relative_error)
 
     latex_str = f'{name} = \\SI' + f'{{{value}({error})}}' + '{' + (units if units is not None else '') + '}' 
     if relative_error is not None:

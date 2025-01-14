@@ -110,22 +110,30 @@ def latexify(expr):
 
     return latex_str
 
+
 def _round_value(value, error):
     v, e = f"{ufloat(value, error):2u}".split('+/-')
     return float(v), float(e)
+
 
 def _round_number(value):
     v, _ = f"{ufloat(value, 10**math.floor(math.log(value, 10))):2u}".split('+/-')
     return float(v)
 
-def latexify_and_round_value(name, value, error=0, units=None, no_relative_error=False):
-    # Currently need to supply the latex unit yourself.
-    v, e = _round_value(value, error) if error != 0 else (_round_number(value), 0)
-    latex_str = f'{name} = \\SI' + f'{{{v}({e})}}' + '{' + (units if units is not None else '') + '}' 
+
+def _latexify_value(name, value, error, units, no_relative_error):
+    latex_str = f'{name} = \\SI' + f'{{{value}({error})}}' + '{' + (units if units is not None else '') + '}' 
     if not no_relative_error and error != 0:
         p = _round_number((error/value)*100)
         latex_str += '\\,' + f'({p}\\%)'
     return latex_str
+
+
+def latexify_and_round_value(name, value, error=0, units=None, no_relative_error=False):
+    # Currently need to supply the latex unit yourself.
+    v, e = _round_value(value, error) if error != 0 else (_round_number(value), 0)
+    return _latexify_value(name, v, e, units, no_relative_error)
+
 
 def latexify_and_round_fit_params(fit_data, units=None):
     latex_str = ""
@@ -136,7 +144,9 @@ def latexify_and_round_fit_params(fit_data, units=None):
     for i, (param, error, unit) in enumerate(zip(fit_data['fit_params'], fit_data['fit_params_error'], units)):
         latex_str += latexify_and_round_value(f'a_{i}', param, error, units=unit) + '\n'
     
-    latex_str += latexify_and_round_value('\\chi^2_{red}', fit_data['chi2_red'], math.sqrt(2/fit_data['dof']), no_relative_error=True) + '\n'
+    chi, chi_e = _round_number(fit_data['chi2_red']), _round_number(math.sqrt(2/fit_data['dof']))
+    latex_str += _latexify_value('\\chi^2_{red}', chi, chi_e, units=None, no_relative_error=True) + '\n'
+
     latex_str += latexify_and_round_value('P_{prob}', fit_data['p_val']) + '\n'
 
     return latex_str

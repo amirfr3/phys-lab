@@ -93,7 +93,7 @@ def build_plot_with_residuals(data, plot_name, xsuffix: Optional[str]=None, ysuf
         ax2.axhline(0, color="r", linestyle="dashed")
 
         ax2.set_title(
-            " - גרף שארים בציר y"[::-1] + plot_name
+            " - גרף שארים בציר x"[::-1] + plot_name
         )  # Add here the full title for the residuals
         ax2.set_xlabel(
             f'{data["columns"][2]}' + _suffix(ysuffix)

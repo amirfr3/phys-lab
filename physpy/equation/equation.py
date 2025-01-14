@@ -152,7 +152,7 @@ def latexify_and_round_fit_params(fit_data, units=None):
         latex_str += latexify_and_round_value(f'a_{i}', param, error, units=unit) + '\n'
     
     chi, chi_e = _round_number(fit_data['chi2_red']), _round_number(math.sqrt(2/fit_data['dof']))
-    latex_str += _latexify_value('\\chi^2_{red}', chi, chi_e, units=None, no_relative_error=True) + '\n'
+    latex_str += _latexify_value('\\chi^2_{red}', chi, chi_e, relative_error=None, units=None) + '\n'
 
     latex_str += latexify_and_round_value('P_{prob}', fit_data['p_val']) + '\n'
 

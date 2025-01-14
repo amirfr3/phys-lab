@@ -122,7 +122,7 @@ def _round_number(value):
 
 
 def _latexify_value(name, value, error, units, no_relative_error):
-    if str(value.endswith(".0")):
+    if str(value).endswith(".0"):
         value = str(int(value))
     if str(error).endswith(".0"):
         error = str(int(error))

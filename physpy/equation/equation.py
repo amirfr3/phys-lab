@@ -115,7 +115,7 @@ def _round_value(value, error):
     return float(v), float(e)
 
 def _round_number(value):
-    v, _ = f"{ufloat(value, math.floor(math.log(value, 10)))}".split('+/-')
+    v, _ = f"{ufloat(value, 10**math.floor(math.log(value, 10)))}".split('+/-')
     return float(v)
 
 def latexify_and_round_value(name, value, error=0, units=None, no_relative_error=False):
@@ -134,7 +134,7 @@ def latexify_and_round_fit_params(fit_params, fit_params_error, chi, dof, p_prob
     units += [None]*(len(fit_params)-len(units))
 
     for i, (param, error, unit) in enumerate(zip(fit_params, fit_params_error, units)):
-        latex_str += latexify_and_round_value('a_{i}', param, units=unit)
+        latex_str += latexify_and_round_value('a_{i}', param, error, units=unit)
     
     latex_str += latexify_and_round_value('\\chi^2_{red}', chi, math.sqrt(2/dof))
     latex_str += latexify_and_round_value('P_{prob}', p_prob)

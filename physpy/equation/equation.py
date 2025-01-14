@@ -127,17 +127,17 @@ def latexify_and_round_value(name, value, error=0, units=None, no_relative_error
         latex_str += '\\,' + f'({p}\\%)'
     return latex_str
 
-def latexify_and_round_fit_params(fit_params, fit_params_error, chi, dof, p_prob, units=None):
+def latexify_and_round_fit_params(fit_data, units=None):
     latex_str = ""
     if units is None:
         units = list()
-    units += [None]*(len(fit_params)-len(units))
+    units += [None]*(len(fit_data['fit_params'])-len(units))
 
-    for i, (param, error, unit) in enumerate(zip(fit_params, fit_params_error, units)):
+    for i, (param, error, unit) in enumerate(zip(fit_data['fit_params'], fit_data['fit_params_error'], units)):
         latex_str += latexify_and_round_value(f'a_{i}', param, error, units=unit) + '\n'
     
-    latex_str += latexify_and_round_value('\\chi^2_{red}', chi, math.sqrt(2/dof), no_relative_error=True) + '\n'
-    latex_str += latexify_and_round_value('P_{prob}', p_prob) + '\n'
+    latex_str += latexify_and_round_value('\\chi^2_{red}', fit_data['chi2_red'], math.sqrt(2/fit_data['dof']), no_relative_error=True) + '\n'
+    latex_str += latexify_and_round_value('P_{prob}', fit_data['p_val']) + '\n'
 
     return latex_str
 

@@ -7,6 +7,7 @@ from typing import Optional
 _SINGLE_PICTURE_GRAPHS = False
 
 def single_picture_graphs(b: bool):
+    global _SINGLE_PICTURE_GRAPHS
     _SINGLE_PICTURE_GRAPHS = b
 
 def _suffix(s):

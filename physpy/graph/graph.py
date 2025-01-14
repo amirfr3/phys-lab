@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from .fit import fit_curve
 from typing import Optional
 
-
+global SINGLE_PICTURE_GRAPHS
 SINGLE_PICTURE_GRAPHS = False
 
 

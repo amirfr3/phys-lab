@@ -1,5 +1,6 @@
 import sympy
-# import uncertainties
+from uncertainties import ufloat
+import math
 
 
 def _get_uncertainty(symbol):
@@ -109,6 +110,64 @@ def latexify(expr):
 
     return latex_str
 
+
+def _round_value(value, error):
+    v, e = f"{ufloat(value, error):.2u}".split('+/-')
+    return float(v), float(e), 
+
+
+def _round_number(value):
+    v, _ = f"{ufloat(value, 10**math.floor(math.log(value, 10))):.2u}".split('+/-')
+    return float(v)
+
+
+def _latexify_value(name, value, error, relative_error, units):
+    if str(value).endswith(".0"):
+        value = int(value)
+    if str(error).endswith(".0"):
+        error = int(error)
+    if str(relative_error).endswith(".0"):
+        relative_error = int(relative_error)
+
+    latex_str = f'{name} = \\SI' + f'{{{value}({error})}}' + '{' + (units if units is not None else '') + '}' 
+    if relative_error is not None:
+        latex_str += '\\,' + f'({relative_error}\\%)'
+    return latex_str
+
+
+def latexify_and_round_value(name, value, error=0, units=None, no_relative_error=False):
+    # Currently need to supply the latex unit yourself.
+    v, e = _round_value(value, error) if error != 0 else (_round_number(value), 0)
+    p = None
+    if not no_relative_error:
+        p = _round_number((error/value)*100)
+    return _latexify_value(name, v, e, p, units)
+
+
+def latexify_and_round_fit_params(fit_data, units=None):
+    latex_str = ""
+    if units is None:
+        units = list()
+    units += [None]*(len(fit_data['fit_params'])-len(units))
+
+    for i, (param, error, unit) in enumerate(zip(fit_data['fit_params'], fit_data['fit_params_error'], units)):
+        latex_str += latexify_and_round_value(f'a_{i}', param, error, units=unit) + '\n'
+    
+    chi, chi_e = _round_number(fit_data['chi2_red']), _round_number(math.sqrt(2/fit_data['dof']))
+    latex_str += _latexify_value('\\chi^2_{red}', chi, chi_e, relative_error=None, units=None) + '\n'
+
+    latex_str += latexify_and_round_value('P_{prob}', fit_data['p_val'], no_relative_error=True) + '\n'
+
+    return latex_str
+
+def latexify_nsigma(nsigma, val1=None, val2=None):
+    values = ""
+    if val1 is not None:
+        if val2 is None:
+            raise ValueError("Need both value names")
+        values = f"({val1},\\:{val2})"
+        
+    return latexify_and_round_value("N_{\\sigma}" + values,  nsigma, no_relative_error=True)
 
 def calculate_value_with_uncertainty(expr, val_dict):
     # Get symbols

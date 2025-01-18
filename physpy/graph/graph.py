@@ -4,15 +4,44 @@ import matplotlib.pyplot as plt
 from .fit import fit_curve
 from typing import Optional
 
+_SINGLE_PICTURE_GRAPHS = False
 
-def build_plot_with_residuals(data, plot_name, xsuffix: Optional[str]=None, ysuffix: Optional[str]=None):
+def single_picture_graphs(b: bool):
+    global _SINGLE_PICTURE_GRAPHS
+    _SINGLE_PICTURE_GRAPHS = b
+
+def _suffix(s):
+    return ' {s}' if s is not None else ''
+
+
+def build_plot_with_residuals(data, plot_name, xsuffix: Optional[str]=None, ysuffix: Optional[str]=None, show_x_residuals=False):
     plt.close("all")
-    fig, axs = plt.subplots(1, 2, figsize=(15, 6))
+    if _SINGLE_PICTURE_GRAPHS:
+        fig1, axs = plt.subplots(1, 2, figsize=(15, 6))
+        figs = [fig1]
+    else:
+        figs = []
+        axs = []
+        fig1, ax1 = plt.subplots(1, 1, figsize=(8,6))
+        figs.append(fig1)
+        axs.append(ax1)
+        fig1, ax1 = plt.subplots(1, 1, figsize=(8,6))
+        figs.append(fig1)
+        axs.append(ax1)
+
+    if show_x_residuals:
+        fig2, ax2 = plt.subplots(1, 1, figsize=(7, 6))
+        figs.append(fig2)
+
     plt.style.use("classic")
 
-    fig.patch.set_facecolor("white")
+    for fig in figs:
+        fig.patch.set_facecolor("white")
+
     for ax in axs:
         ax.set_facecolor("white")
+    if show_x_residuals:
+        ax2.set_facecolor("white")
 
     x_fit = np.linspace(min(data["x"]), max(data["x"]), 10 * len(data["x"]))
     y_fit = data["fit_func"](data["fit_params"], x_fit)
@@ -35,10 +64,10 @@ def build_plot_with_residuals(data, plot_name, xsuffix: Optional[str]=None, ysuf
 
     axs[0].set_title(plot_name)  # Add here the full title for the fit
     axs[0].set_xlabel(
-        f'{data["columns"][0]} {xsuffix}'
+        f'{data["columns"][0]}' + _suffix(xsuffix)
     )  # Change x-axis label if needed
     axs[0].set_ylabel(
-        f'{data["columns"][2]} {ysuffix}'
+        f'{data["columns"][2]}' + _suffix(ysuffix)
     )  # Change y-axis label if needed
 
     axs[0].grid(True)
@@ -53,20 +82,47 @@ def build_plot_with_residuals(data, plot_name, xsuffix: Optional[str]=None, ysuf
         label="Data",
         ecolor="gray",
     )
-    axs[1].hlines(0, min(data["x"]), max(data["x"]), colors="r", linestyles="dashed")
+    #axs[1].hlines(0, min(data["x"]), max(data["x"]), colors="r", linestyles="dashed")
+    axs[1].axhline(0, color="r", linestyle="dashed")
 
     axs[1].set_title(
         " - גרף שארים"[::-1] + plot_name
     )  # Add here the full title for the residuals
     axs[1].set_xlabel(
-        f'{data["columns"][0]} {xsuffix}'
-    )  # Change column names if needed
+        f'{data["columns"][0]}' + _suffix(xsuffix))  # Change column names if needed
     axs[1].set_ylabel(
-        f'{data["columns"][2]} - fit({data["columns"][0]}) {ysuffix}'
+        f'{data["columns"][2].split()[0]} - fit({data["columns"][0].split()[0]}) {data["columns"][2].split()[1]}' + _suffix(ysuffix)[1:]
     )  # Change column names if needed
 
     axs[1].grid(True)
     # axs[1].legend()
+    if show_x_residuals:
+        if data['x_residuals'] is None:
+            raise TypeError('No inverse function for the chosen fit function. consider defining it and adding it to to INVERSE_FUNCTION dict.')
+
+        ax2.errorbar(
+            data["y"],
+            data["x_residuals"],
+            xerr=data["delta_y"],
+            yerr=data["delta_x"],
+            fmt=".b",
+            label="Data",
+            ecolor="gray",
+        )
+        #ax2.hlines(0, min(data["y"]), max(data["y"]), colors="r", linestyles="dashed")
+        ax2.axhline(0, color="r", linestyle="dashed")
+
+        ax2.set_title(
+            " - גרף שארים בציר x"[::-1] + plot_name
+        )  # Add here the full title for the residuals
+        ax2.set_xlabel(
+            f'{data["columns"][2]}' + _suffix(ysuffix)
+        )  # Change column names if needed
+        ax2.set_ylabel(
+            f'{data["columns"][0].split()[0]} - fit^-1({data["columns"][2].split()[0]}) {data["columns"][0].split()[1]}' + _suffix(xsuffix)[1:]
+        )  # Change column names if needed
+
+        ax2.grid(True)
 
     plt.tight_layout()
     return plt
@@ -108,7 +164,8 @@ def make_graph(
     debug_show=False,
     columns=(0,1,2,3),
     xsuffix: Optional[str]=None,
-    ysuffix: Optional[str]=None
+    ysuffix: Optional[str]=None,
+    show_x_residuals=False
 ):
     """
     graph_title: Title for graph (RTL)
@@ -122,7 +179,7 @@ def make_graph(
     graph_title_rtl = graph_title[::-1]
     processed_data = fit_curve(fit_func, initial_guesses, table_or_file_path, sheet_idx, columns=columns)
 
-    plt = build_plot_with_residuals(processed_data, graph_title_rtl, xsuffix=xsuffix, ysuffix=ysuffix)
+    plt = build_plot_with_residuals(processed_data, graph_title_rtl, xsuffix=xsuffix, ysuffix=ysuffix, show_x_residuals=show_x_residuals)
 
     if not output_folder:
         output_folder = "." # Default to current directory

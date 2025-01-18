@@ -4,12 +4,17 @@ import numpy as np
 
 
 def calc_stats(x, y, fit_func, fit_params, output):
+    from .fit import INVERSE_FUNCTION
+
     residuals = y - fit_func(fit_params, x)
+    x_residuals = None
+    if INVERSE_FUNCTION.get(fit_func):
+        x_residuals = x - INVERSE_FUNCTION[fit_func](fit_params, y)
     degrees_of_freedom = len(x) - len(fit_params)
     chi2 = output.sum_square
     chi2_red = chi2 / degrees_of_freedom
     p_val = scipy.stats.chi2.sf(chi2, degrees_of_freedom)
-    return residuals, degrees_of_freedom, chi2_red, p_val
+    return residuals, degrees_of_freedom, chi2_red, p_val, x_residuals
 
 
 def format_output(fit_params, fit_params_error, chi2_red, p_val, degrees_of_freedom):

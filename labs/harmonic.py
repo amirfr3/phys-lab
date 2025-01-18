@@ -195,7 +195,7 @@ def generate_oscillation_graph(
     _, part, num = measurement_filename.split("\\")[-1].split("_")
 
     part_str = {"a": "א'", "b": "ב'"}[part]
-    num_str = num
+    num_str = num[::-1]
 
     graph_name = f"גרף תנודה - חלק {part_str} מדידה {num_str}"
 
@@ -342,6 +342,7 @@ def main():
     sympy.init_printing()
 
     datasheet = DATASHEET_PATH
+    physpy.graph.single_picture_graphs(True)
 
     # Read params sheet into global namespace
     read_params(datasheet)

@@ -195,9 +195,9 @@ def make_graph(
             print(processed_data["fit_results"])
         plt.show()
 
-    if processed_data['extreme_measuments']:
+    if processed_data['extreme_measurments']:
         print("**EXTREME MEASUMENTS**\n")
-        for m in processed_data['extreme_measuments']:
+        for m in processed_data['extreme_measurments']:
             print(f"{m[0]}: {m[1]}")
 
     return processed_data

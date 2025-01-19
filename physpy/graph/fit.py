@@ -57,7 +57,7 @@ def check_for_extreme_measurements(residuals, errors):
     residual_to_error_extreme = filter(
         lambda x: x[1] > 3,
         [
-            (i, abs(residual / error * 2))
+            (i, abs(residual / (error * 2)))
             for i, residual, error in zip(residuals.index, residuals, errors)
         ],
     )

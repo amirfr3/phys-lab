@@ -196,9 +196,10 @@ def make_graph(
         plt.show()
 
     if processed_data['extreme_measurments']:
-        print("**EXTREME MEASUMENTS**\n")
+        print("**EXTREME MEASUMENTS**")
         for m in processed_data['extreme_measurments']:
             print(f"{m[0]}: {m[1]}")
+        print()
 
     return processed_data
 

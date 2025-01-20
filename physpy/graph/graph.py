@@ -165,7 +165,8 @@ def make_graph(
     columns=(0,1,2,3),
     xsuffix: Optional[str]=None,
     ysuffix: Optional[str]=None,
-    show_x_residuals=False
+    show_x_residuals=False,
+    print_outliers=True
 ):
     """
     graph_title: Title for graph (RTL)
@@ -194,6 +195,12 @@ def make_graph(
             )
             print(processed_data["fit_results"])
         plt.show()
+
+    if processed_data['outliers'] and print_outliers:
+        print("**OUTLIERS**")
+        for m in processed_data['outliers']:
+            print(f"{m[0]}: {m[1]}")
+        print()
 
     return processed_data
 

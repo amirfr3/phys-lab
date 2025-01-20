@@ -53,25 +53,16 @@ def odr_fit(fit_func, initial_guesses, x, delta_x, y, delta_y):
     return fit_params, fit_params_error, fit_cov, output
 
 
-def check_for_extreme_measurements(residuals, errors):
-    residual_to_error_extreme = filter(
+def find_outliers(residuals, errors):
+    outliers = filter(
         lambda x: x[1] > 3,
         [
-            (i, abs(residual / error * 2))
-            for i, (residual, error) in enumerate(zip(residuals, errors))
+            (i, abs(residual / (error * 2)))
+            for i, residual, error in zip(residuals.index, residuals, errors)
         ],
     )
 
-    extreme_amount_to_remove = -1 * int(3 / 10 * len(residuals))
-    return sorted(residual_to_error_extreme, key=lambda x: x[1])[
-        extreme_amount_to_remove:
-    ]
-
-
-def remove_extremes(data_points, extremes):
-    for extreme in extremes:
-        for col in data_points:
-            col.pop(extreme[0])
+    return sorted(outliers, key=lambda x: x[1])
 
 
 def get_columns(data, columns):
@@ -101,6 +92,7 @@ def fit_curve(
     fit_params, fit_params_error, fit_cov, output = odr_fit(
         fit_func, initial_guesses, x, delta_x, y, delta_y
     )
+
     residuals, degrees_of_freedom, chi2_red, p_val, x_residuals = calc_stats(
         x, y, fit_func, fit_params, output
     )
@@ -128,6 +120,7 @@ def fit_curve(
         "chi2_red": chi2_red,
         "p_val": p_val,
         "fit_results": fit_results_str,
+        "outliers": find_outliers(residuals, delta_y),
     }
 
     return processed_data

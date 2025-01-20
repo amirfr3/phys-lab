@@ -53,8 +53,8 @@ def odr_fit(fit_func, initial_guesses, x, delta_x, y, delta_y):
     return fit_params, fit_params_error, fit_cov, output
 
 
-def check_for_extreme_measurements(residuals, errors):
-    residual_to_error_extreme = filter(
+def find_outliers(residuals, errors):
+    outliers = filter(
         lambda x: x[1] > 3,
         [
             (i, abs(residual / (error * 2)))
@@ -62,13 +62,7 @@ def check_for_extreme_measurements(residuals, errors):
         ],
     )
 
-    return sorted(residual_to_error_extreme, key=lambda x: x[1])
-
-
-def remove_extremes(data_points, extremes):
-    for extreme in extremes:
-        for col in data_points:
-            col.pop(extreme[0])
+    return sorted(outliers, key=lambda x: x[1])
 
 
 def get_columns(data, columns):
@@ -126,7 +120,7 @@ def fit_curve(
         "chi2_red": chi2_red,
         "p_val": p_val,
         "fit_results": fit_results_str,
-        "extreme_measurments": check_for_extreme_measurements(residuals, delta_y),
+        "outliers": find_outliers(residuals, delta_y),
     }
 
     return processed_data

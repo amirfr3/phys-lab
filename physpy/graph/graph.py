@@ -5,22 +5,23 @@ import matplotlib.pyplot as plt
 from .fit import fit_curve
 from typing import Optional
 
+
 _SINGLE_PICTURE_GRAPHS = False
 
 def single_picture_graphs(b: bool):
     global _SINGLE_PICTURE_GRAPHS
     _SINGLE_PICTURE_GRAPHS = b
 
-def _suffix(s):
-    return ' {s}' if s is not None else ''
 
 def _latex_wrap(s, should_wrap):
     if should_wrap:
         return '$' + s + '$'
     return s
 
+
 def _is_hebrew(s):
     return any(c in s for c in 'אבגדהוזחטיכלמנסעפצקרשת')
+
 
 def build_plot_with_residuals(data, plot_name, xsuffix: Optional[str]=None, ysuffix: Optional[str]=None, show_x_residuals=False, latex_labels=False):
     plt.close("all")

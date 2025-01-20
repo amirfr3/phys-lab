@@ -16,8 +16,8 @@ def _suffix(s):
 
 def _latex_wrap(s, should_wrap):
     if should_wrap:
-        return '$' + should_wrap + '$'
-    return should_wrap
+        return '$' + s + '$'
+    return s
 
 def _is_hebrew(s):
     return any(c in s for c in 'אבגדהוזחטיכלמנסעפצקרשת')

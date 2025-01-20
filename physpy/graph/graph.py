@@ -79,10 +79,12 @@ def build_plot_with_residuals(data, plot_name, xsuffix: Optional[str]=None, ysuf
 
     axs[0].set_title(plot_name)  # Add here the full title for the fit
     axs[0].set_xlabel(
-        _latex_wrap(f'{x_label}{sep}{x_label_suffix}', latex_labels)
+        _latex_wrap(f'{x_label}{sep}{x_label_suffix}', latex_labels),
+        fontsize=15 if latex_labels else 10
     )  # Change x-axis label if needed
     axs[0].set_ylabel(
-        _latex_wrap(f'{y_label}{sep}{y_label_suffix}', latex_labels)
+        _latex_wrap(f'{y_label}{sep}{y_label_suffix}', latex_labels),
+        fontsize=15 if latex_labels else 10
     )  # Change y-axis label if needed
 
     axs[0].grid(True)
@@ -110,10 +112,12 @@ def build_plot_with_residuals(data, plot_name, xsuffix: Optional[str]=None, ysuf
         )  # Add here the full title for the residuals
 
     axs[1].set_xlabel(
-        _latex_wrap(f'{x_label}{sep}{x_label_suffix}', latex_labels)
+        _latex_wrap(f'{x_label}{sep}{x_label_suffix}', latex_labels),
+        fontsize=15 if latex_labels else 10
     )  # Change column names if needed
     axs[1].set_ylabel(
-        _latex_wrap(f'{y_label} - fit({x_label}){sep}{x_label_suffix}', latex_labels)
+        _latex_wrap(f'{y_label} - fit({x_label}){sep}{x_label_suffix}', latex_labels),
+        fontsize=15 if latex_labels else 10
     )  # Change column names if needed
 
     axs[1].grid(True)
@@ -143,10 +147,12 @@ def build_plot_with_residuals(data, plot_name, xsuffix: Optional[str]=None, ysuf
                 plot_name + " - X Axis Residuals"
             )  # Add here the full title for the residuals
         ax2.set_xlabel(
-            _latex_wrap(f'{y_label}{sep}{y_label_suffix}', latex_labels)
+            _latex_wrap(f'{y_label}{sep}{y_label_suffix}', latex_labels),
+            fontsize=15 if latex_labels else 10
         )  # Change column names if needed
         ax2.set_ylabel(
-            f'{x_label} - fit^-1({y_label}){sep}{x_label_suffix}'
+            f'{x_label} - fit^-1({y_label}){sep}{x_label_suffix}',
+            fontsize=15 if latex_labels else 10
         )  # Change column names if needed
 
         ax2.grid(True)

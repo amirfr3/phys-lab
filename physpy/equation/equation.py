@@ -1,6 +1,9 @@
 import sympy
 from uncertainties import ufloat
+from dataclasses import dataclass
+from typing import Any, Dict
 import math
+from ..utils.utils import get_value_error
 
 
 def _get_uncertainty(symbol):
@@ -9,7 +12,7 @@ def _get_uncertainty(symbol):
 
 
 def get_uncertainties(symbols):
-    if hasattr(symbols, '__iter__'):
+    if hasattr(symbols, "__iter__"):
         return (_get_uncertainty(symbol) for symbol in symbols)
 
     # Singular
@@ -20,14 +23,115 @@ def get_symbols_with_uncertainties(symbols_str):
     symbols = sympy.symbols(symbols_str)
     uncertainties = get_uncertainties(symbols)
 
-    # Return each symbol with its uncertainty
-    return zip(symbols, uncertainties) 
+    try:
+        # Return each symbol with its uncertainty
+        return zip(symbols, uncertainties)
+    except TypeError:
+        # Symbols aren't iterable
+        return (symbols, uncertainties)
+
+
+@dataclass
+class Symbol:
+    name: str
+    sym: sympy.Symbol
+    delta_sym: sympy.Symbol
+    val: float
+    delta_val: float
+    expr: sympy.Eq = None
+    delta_expr: sympy.Eq = None
+
+    def set_expr(self, expr, delta_expr=None):
+        self.expr = sympy.Eq(self.sym, expr)
+        if not delta_expr:
+            self.delta_expr = calculate_indirect_error_formula(self.expr)
+        else:
+            self.delta_expr = sympy.Eq(self.delta_sym, delta_expr)
+
+    def calculate_value(self, subs):
+        self.val = self.expr.rhs.subs(subs)
+        self.delta_val = self.delta_expr.rhs.subs(subs)
+
+        # TODO: Assert that an actual value is received? Rather than expression with missing values
+
+        return self.val, self.delta_val
+
+    def __str__(self):
+        return f"{self.name}: {get_value_error(self.val, self.delta_val)}"
+
+
+@dataclass
+class SymbolTable:
+    symbols: Dict
+
+    # Convenience method
+    @staticmethod
+    def build(param_table=None, symbols_str=None):
+        return get_symbols_table(param_table=param_table, symbols_str=symbols_str)
+
+    def add(self, symbol: Symbol):
+        self.symbols[symbol.name.lower()] = symbol
+
+    def extend(self, param_table=None, symbols_str=None):
+        more_symbols = get_symbols_table(
+            param_table=param_table, symbols_str=symbols_str
+        )
+        self.symbols.update(more_symbols.symbols)
+
+    def values(self):
+        v = {}
+        v.update({s.sym: s.val for s in self.symbols.values()})
+        v.update({s.delta_sym: s.delta_val for s in self.symbols.values()})
+        return v
+
+    # This is order dependant and buggy :(
+    # def calculate_values(self):
+    #     for s in self.symbols:
+    #         s.calculate_value(self.values())
+    #     return self.values()
+
+    def __getattr__(self, name):
+        if name in self.symbols.keys():
+            return self.symbols[name.lower()]
+        else:
+            raise AttributeError(f"No symbol named {name}")
+
+
+def get_symbols_table(param_table=None, symbols_str=None):
+    if symbols_str:
+        symbol_names = symbols_str.split()
+    elif param_table:
+        symbol_names = param_table.keys()
+    else:
+        raise ValueError("One of param_table or symbols_str must be provided")
+
+    symbols_table = {}
+
+    for symbol_name in symbol_names:
+        sym, delta_sym = get_symbols_with_uncertainties(symbol_name)
+        if param_table:
+            try:
+                val, delta_val = (
+                    param_table[symbol_name].val,
+                    param_table[symbol_name].delta_val,
+                )
+            except KeyError:
+                val, delta_val = None, None
+        else:
+            val, delta_val = None, None
+
+        symbols_table[symbol_name.lower()] = Symbol(
+            symbol_name, sym, delta_sym, val, delta_val
+        )
+
+    return SymbolTable(symbols_table)
 
 
 class UnsupportedOperationError(KeyError):
     pass
 
 
+"""
 def calculate_indirect_error_sym(expr):
     assert expr.func is sympy.core.symbol.Symbol
 
@@ -81,6 +185,7 @@ def _calculate_indirect_error(expr):
 
     except KeyError:
         raise UnsupportedOperationError("Unsupported operation in expression")
+"""
 
 
 # TODO: Maybe receive list of parameters as well
@@ -90,21 +195,23 @@ def calculate_indirect_error_formula(expr):
     # Basic version
     return sympy.Eq(
         get_uncertainties(expr.lhs),
-        sympy.sqrt(sum(
-            [(expr.rhs.diff(s)*get_uncertainties(s))**2 for s in expr.rhs.free_symbols]
-        ))
+        sympy.sqrt(
+            sum(
+                [
+                    (expr.rhs.diff(s) * get_uncertainties(s)) ** 2
+                    for s in expr.rhs.free_symbols
+                ]
+            )
+        ),
     )
 
-    return sympy.Eq(get_uncertainties(expr.lhs), _calculate_indirect_error(expr.rhs))
+    # return sympy.Eq(get_uncertainties(expr.lhs), _calculate_indirect_error(expr.rhs))
 
 
 def latexify(expr):
     latex_str = sympy.printing.latex(expr)
 
-    latex_str = latex_str.replace(
-        r"Delta_",
-        r"Delta"
-    )
+    latex_str = latex_str.replace(r"Delta_", r"Delta")
 
     # TODO: Fix subscripts
 
@@ -112,12 +219,15 @@ def latexify(expr):
 
 
 def _round_value(value, error):
-    v, e = f"{ufloat(value, error):.2u}".split('+/-')
-    return float(v), float(e), 
+    v, e = f"{ufloat(value, error):.2u}".split("+/-")
+    return (
+        float(v),
+        float(e),
+    )
 
 
 def _round_number(value):
-    v, _ = f"{ufloat(value, 10**math.floor(math.log(value, 10))):.2u}".split('+/-')
+    v, _ = f"{ufloat(value, 10**math.floor(math.log(value, 10))):.2u}".split("+/-")
     return float(v)
 
 
@@ -129,9 +239,15 @@ def _latexify_value(name, value, error, relative_error, units):
     if str(relative_error).endswith(".0"):
         relative_error = int(relative_error)
 
-    latex_str = f'{name} = \\SI' + f'{{{value}({error})}}' + '{' + (units if units is not None else '') + '}' 
+    latex_str = (
+        f"{name} = \\SI"
+        + f"{{{value}({error})}}"
+        + "{"
+        + (units if units is not None else "")
+        + "}"
+    )
     if relative_error is not None:
-        latex_str += '\\,' + f'({relative_error}\\%)'
+        latex_str += "\\," + f"({relative_error}\\%)"
     return latex_str
 
 
@@ -140,7 +256,7 @@ def latexify_and_round_value(name, value, error=0, units=None, no_relative_error
     v, e = _round_value(value, error) if error != 0 else (_round_number(value), 0)
     p = None
     if not no_relative_error:
-        p = _round_number((error/value)*100)
+        p = _round_number((error / value) * 100)
     return _latexify_value(name, v, e, p, units)
 
 
@@ -148,17 +264,28 @@ def latexify_and_round_fit_params(fit_data, units=None):
     latex_str = ""
     if units is None:
         units = list()
-    units += [None]*(len(fit_data['fit_params'])-len(units))
+    units += [None] * (len(fit_data["fit_params"]) - len(units))
 
-    for i, (param, error, unit) in enumerate(zip(fit_data['fit_params'], fit_data['fit_params_error'], units)):
-        latex_str += latexify_and_round_value(f'a_{i}', param, error, units=unit) + '\n'
-    
-    chi, chi_e = _round_number(fit_data['chi2_red']), _round_number(math.sqrt(2/fit_data['dof']))
-    latex_str += _latexify_value('\\chi^2_{red}', chi, chi_e, relative_error=None, units=None) + '\n'
+    for i, (param, error, unit) in enumerate(
+        zip(fit_data["fit_params"], fit_data["fit_params_error"], units)
+    ):
+        latex_str += latexify_and_round_value(f"a_{i}", param, error, units=unit) + "\n"
 
-    latex_str += latexify_and_round_value('P_{prob}', fit_data['p_val'], no_relative_error=True) + '\n'
+    chi, chi_e = _round_number(fit_data["chi2_red"]), _round_number(
+        math.sqrt(2 / fit_data["dof"])
+    )
+    latex_str += (
+        _latexify_value("\\chi^2_{red}", chi, chi_e, relative_error=None, units=None)
+        + "\n"
+    )
+
+    latex_str += (
+        latexify_and_round_value("P_{prob}", fit_data["p_val"], no_relative_error=True)
+        + "\n"
+    )
 
     return latex_str
+
 
 def latexify_nsigma(nsigma, val1=None, val2=None):
     values = ""
@@ -166,8 +293,11 @@ def latexify_nsigma(nsigma, val1=None, val2=None):
         if val2 is None:
             raise ValueError("Need both value names")
         values = f"({val1},\\:{val2})"
-        
-    return latexify_and_round_value("N_{\\sigma}" + values,  nsigma, no_relative_error=True)
+
+    return latexify_and_round_value(
+        "N_{\\sigma}" + values, nsigma, no_relative_error=True
+    )
+
 
 def calculate_value_with_uncertainty(expr, val_dict):
     # Get symbols

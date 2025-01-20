@@ -128,31 +128,6 @@ def build_plot_with_residuals(data, plot_name, xsuffix: Optional[str]=None, ysuf
     return plt
 
 
-def read_table(
-    file_path,
-    sheet_idx,
-):
-    data = pd.read_excel(file_path, sheet_name=sheet_idx)
-    return data
-
-
-def convert_units(
-    table,
-    src_col_name,
-    dst_col_name,
-    conversion_func,
-):
-    dst_col = table[src_col_name].apply(conversion_func).rename(dst_col_name)
-    table[src_col_name] = dst_col
-    table.rename(columns={src_col_name: dst_col_name}, inplace=True)
-    return table
-
-
-def flip_table_axis(table):
-    table = table[[table.columns[2], table.columns[3], table.columns[0], table.columns[1]]]
-    return table
-
-
 def make_graph(
     graph_title,
     table_or_file_path,
@@ -196,7 +171,3 @@ def make_graph(
         plt.show()
 
     return processed_data
-
-
-def calc_inst_error(res):
-    return res/np.sqrt(12)

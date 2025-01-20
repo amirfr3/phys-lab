@@ -299,9 +299,9 @@ def generate_period_graph(fit_data_list, table, x_col):
 
     initial_guess = [
         (0, 4*(math.pi**2)/9.81),
-        (0, 4*(math.pi**2)/25),      
+        (0, 4*(math.pi**2)/25),
     ][i]
-
+    
     fit_data = physpy.graph.make_graph(
         graph_name,
         fit_table,
@@ -311,6 +311,10 @@ def generate_period_graph(fit_data_list, table, x_col):
         output_folder=RESULTS_FOLDER,
         show=True,
     )
+
+    fit_table = physpy.table.add_relative_error_to_table(fit_table, x_col, f"delta_{x_col}")
+    fit_table = physpy.table.add_relative_error_to_table(fit_table, "Period^2 [sec^2]", f"delta_Period^2 [sec^2]")
+    fit_table.to_excel(RESULTS_FOLDER + f"\\{graph_name}.xlsx")
 
     return fit_data
 

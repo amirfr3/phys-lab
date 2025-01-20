@@ -78,10 +78,10 @@ def build_plot_with_residuals(data, plot_name, xsuffix: Optional[str]=None, ysuf
 
     axs[0].set_title(plot_name)  # Add here the full title for the fit
     axs[0].set_xlabel(
-        _latex_wrap(x_label + x_label_suffix, latex_labels)
+        _latex_wrap(f'{x_label} {x_label_suffix}', latex_labels)
     )  # Change x-axis label if needed
     axs[0].set_ylabel(
-        _latex_wrap(y_label + y_label_suffix, latex_labels)
+        _latex_wrap(f'{y_label} {y_label_suffix}', latex_labels)
     )  # Change y-axis label if needed
 
     axs[0].grid(True)

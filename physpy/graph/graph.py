@@ -69,11 +69,11 @@ def build_plot_with_residuals(data, plot_name, xsuffix: Optional[str]=None, ysuf
     # If you want to plot multiple functions, change here the relevant parameters (x, y, xerr, yerr, label). Otherwise, uncomment the 2 next lines:
     # axs[0].errorbar(data["x"] + 0.2, data["y"] + 0.3, xerr=data["delta_x"], yerr=data["delta_y"], fmt='.g', label='Data', ecolor='gray')
     # axs[0].plot(x_fit + 0.2, y_fit + 0.3, label='Fit', c='k', alpha=0.5)
-    x_label_suffix = data['columns'][0].split()[1] if len(data['columns'][0].split()) > 1 else '' +\
-        x_label if x_label is not None else ''
+    x_label_suffix = (data['columns'][0].split()[1] if len(data['columns'][0].split()) > 1 else '') +\
+        (x_label if x_label is not None else '')
     x_label = data['columns'][0].split()[0]
-    y_label_suffix = data['columns'][2].split()[1] if len(data['columns'][2].split()) > 1 else '' +\
-        x_label if x_label is not None else ''
+    y_label_suffix = (data['columns'][2].split()[1] if len(data['columns'][2].split()) > 1 else '') +\
+        (x_label if x_label is not None else '')
     y_label = data['columns'][2].split()[0]
 
     axs[0].set_title(plot_name)  # Add here the full title for the fit

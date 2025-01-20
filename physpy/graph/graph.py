@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -215,9 +216,9 @@ def make_graph(
 
     if not output_folder:
         output_folder = "." # Default to current directory
-    with open(f"{output_folder}\\{graph_title}_stats.txt", "w") as f:
+    with open(os.path.join(output_folder, f"{graph_title}_stats.txt"), "w") as f:
         f.write(processed_data["fit_results"])
-    plt.savefig(f"{output_folder}\\{graph_title}.svg")
+    plt.savefig(os.path.join(output_folder,f"{graph_title}.svg"))
 
     if show:
         if debug_show:

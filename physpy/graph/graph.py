@@ -116,7 +116,7 @@ def build_plot_with_residuals(data, plot_name, xsuffix: Optional[str]=None, ysuf
         fontsize=12 if latex_labels else 10
     )  # Change column names if needed
     axs[1].set_ylabel(
-        _latex_wrap(f'{y_label} - fit({x_label}){sep}{x_label_suffix}', latex_labels),
+        _latex_wrap(f'{y_label} - fit({x_label}){sep}{y_label_suffix}', latex_labels),
         fontsize=12 if latex_labels else 10
     )  # Change column names if needed
 

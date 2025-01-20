@@ -228,7 +228,8 @@ def make_graph(
             f.write(processed_data["fit_results"])
         plt.savefig(os.path.join(output_folder,f"{graph_filename}.svg"))
         pd.concat((processed_data['x'], processed_data['delta_x'], 
-                  processed_data['y'], processed_data['delta_y']), axis=1).to_csv(os.path.join(output_folder, f'{graph_filename}_fit_data.csv'))
+                  processed_data['y'], processed_data['delta_y']), axis=1)\
+        .to_csv(os.path.join(output_folder, f'{graph_filename}_fit_data.csv', index=False))
 
     if show:
         if debug_show:

@@ -223,9 +223,13 @@ def make_graph(
                                     show_x_residuals=show_x_residuals, latex_labels=latex_labels)
 
     if output_folder is not None:
-        with open(os.path.join(output_folder, f"{graph_title}_stats.txt"), "w") as f:
+        graph_filename = graph_title.replace(' ', '_')
+        with open(os.path.join(output_folder, f"{graph_filename}_stats.txt"), "w") as f:
             f.write(processed_data["fit_results"])
-        plt.savefig(os.path.join(output_folder,f"{graph_title}.svg"))
+        plt.savefig(os.path.join(output_folder,f"{graph_filename}.svg"))
+        pd.concat((processed_data['x'], processed_data['delta_x'], 
+                  processed_data['y'], processed_data['delta_y']), axis=1)\
+        .to_csv(os.path.join(output_folder, f'{graph_filename}_fit_data.csv'), index=False)
 
     if show:
         if debug_show:

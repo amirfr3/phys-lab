@@ -13,8 +13,15 @@ def single_picture_graphs(b: bool):
 def _suffix(s):
     return ' {s}' if s is not None else ''
 
+def _latex_wrap(s, should_wrap):
+    if should_wrap:
+        return '$' + should_wrap + '$'
+    return should_wrap
 
-def build_plot_with_residuals(data, plot_name, xsuffix: Optional[str]=None, ysuffix: Optional[str]=None, show_x_residuals=False):
+def _is_hebrew(s):
+    return any(c in s for c in 'אבגדהוזחטיכלמנסעפצקרשת')
+
+def build_plot_with_residuals(data, plot_name, xsuffix: Optional[str]=None, ysuffix: Optional[str]=None, show_x_residuals=False, latex_labels=False):
     plt.close("all")
     if _SINGLE_PICTURE_GRAPHS:
         fig1, axs = plt.subplots(1, 2, figsize=(15, 6))
@@ -61,13 +68,19 @@ def build_plot_with_residuals(data, plot_name, xsuffix: Optional[str]=None, ysuf
     # If you want to plot multiple functions, change here the relevant parameters (x, y, xerr, yerr, label). Otherwise, uncomment the 2 next lines:
     # axs[0].errorbar(data["x"] + 0.2, data["y"] + 0.3, xerr=data["delta_x"], yerr=data["delta_y"], fmt='.g', label='Data', ecolor='gray')
     # axs[0].plot(x_fit + 0.2, y_fit + 0.3, label='Fit', c='k', alpha=0.5)
+    x_label_suffix = data['columns'][0].split()[1] if len(data['columns'][0].split()) > 1 else '' +\
+        x_label if x_label is not None else ''
+    x_label = data['columns'][0].split()[0]
+    y_label_suffix = data['columns'][2].split()[1] if len(data['columns'][2].split()) > 1 else '' +\
+        x_label if x_label is not None else ''
+    y_label = data['columns'][2].split()[0]
 
     axs[0].set_title(plot_name)  # Add here the full title for the fit
     axs[0].set_xlabel(
-        f'{data["columns"][0]}' + _suffix(xsuffix)
+        _latex_wrap(x_label + x_label_suffix, latex_labels)
     )  # Change x-axis label if needed
     axs[0].set_ylabel(
-        f'{data["columns"][2]}' + _suffix(ysuffix)
+        _latex_wrap(y_label + y_label_suffix, latex_labels)
     )  # Change y-axis label if needed
 
     axs[0].grid(True)
@@ -85,13 +98,20 @@ def build_plot_with_residuals(data, plot_name, xsuffix: Optional[str]=None, ysuf
     #axs[1].hlines(0, min(data["x"]), max(data["x"]), colors="r", linestyles="dashed")
     axs[1].axhline(0, color="r", linestyle="dashed")
 
-    axs[1].set_title(
-        " - גרף שארים"[::-1] + plot_name
-    )  # Add here the full title for the residuals
+    if _is_hebrew(plot_name):
+        axs[1].set_title(
+            " - גרף שארים"[::-1] + plot_name
+        )  # Add here the full title for the residuals
+    else:
+        axs[1].set_title(
+            plot_name + " - Residuals"
+        )  # Add here the full title for the residuals
+
     axs[1].set_xlabel(
-        f'{data["columns"][0]}' + _suffix(xsuffix))  # Change column names if needed
+        _latex_wrap(f'{x_label} {x_label_suffix}', latex_labels)
+    )  # Change column names if needed
     axs[1].set_ylabel(
-        f'{data["columns"][2].split()[0]} - fit({data["columns"][0].split()[0]}) {data["columns"][2].split()[1]}' + _suffix(ysuffix)[1:]
+        _latex_wrap(f'{y_label} - fit({x_label}) {x_label_suffix}', latex_labels)
     )  # Change column names if needed
 
     axs[1].grid(True)
@@ -112,14 +132,19 @@ def build_plot_with_residuals(data, plot_name, xsuffix: Optional[str]=None, ysuf
         #ax2.hlines(0, min(data["y"]), max(data["y"]), colors="r", linestyles="dashed")
         ax2.axhline(0, color="r", linestyle="dashed")
 
-        ax2.set_title(
-            " - גרף שארים בציר x"[::-1] + plot_name
-        )  # Add here the full title for the residuals
+        if _is_hebrew(plot_name):
+            ax2.set_title(
+                " - גרף שארים בציר x"[::-1] + plot_name
+            )  # Add here the full title for the residuals
+        else:
+            ax2.set_title(
+                plot_name + " - X Axis Residuals"
+            )  # Add here the full title for the residuals
         ax2.set_xlabel(
-            f'{data["columns"][2]}' + _suffix(ysuffix)
+            _latex_wrap(f'{y_label} {y_label_suffix}', latex_labels)
         )  # Change column names if needed
         ax2.set_ylabel(
-            f'{data["columns"][0].split()[0]} - fit^-1({data["columns"][2].split()[0]}) {data["columns"][0].split()[1]}' + _suffix(xsuffix)[1:]
+            f'{x_label} - fit^-1({y_label}) {x_label_suffix}'
         )  # Change column names if needed
 
         ax2.grid(True)
@@ -166,7 +191,8 @@ def make_graph(
     xsuffix: Optional[str]=None,
     ysuffix: Optional[str]=None,
     show_x_residuals=False,
-    print_outliers=True
+    print_outliers=True,
+    latex_labels=False
 ):
     """
     graph_title: Title for graph (RTL)
@@ -177,16 +203,21 @@ def make_graph(
     """
 
     # Reverse Hebrew RTL
-    graph_title_rtl = graph_title[::-1]
+    if _is_hebrew(graph_title):
+        graph_title_rtl = graph_title[::-1]
+    else:
+        graph_title_rtl = graph_title
+
     processed_data = fit_curve(fit_func, initial_guesses, table_or_file_path, sheet_idx, columns=columns)
 
-    plt = build_plot_with_residuals(processed_data, graph_title_rtl, xsuffix=xsuffix, ysuffix=ysuffix, show_x_residuals=show_x_residuals)
+    plt = build_plot_with_residuals(processed_data, graph_title_rtl, xsuffix=xsuffix, ysuffix=ysuffix, 
+                                    show_x_residuals=show_x_residuals, latex_labels=latex_labels)
 
     if not output_folder:
         output_folder = "." # Default to current directory
     with open(f"{output_folder}\\{graph_title}_stats.txt", "w") as f:
         f.write(processed_data["fit_results"])
-    plt.savefig(f"{output_folder}\\{graph_title}.png")
+    plt.savefig(f"{output_folder}\\{graph_title}.svg")
 
     if show:
         if debug_show:

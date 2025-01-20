@@ -227,6 +227,8 @@ def make_graph(
             )
             print(processed_data["fit_results"])
         plt.show()
+    else:
+        plt.close("all")
 
     if processed_data['outliers'] and print_outliers:
         print("**OUTLIERS**")

@@ -227,7 +227,8 @@ def make_graph(
         with open(os.path.join(output_folder, f"{graph_filename}_stats.txt"), "w") as f:
             f.write(processed_data["fit_results"])
         plt.savefig(os.path.join(output_folder,f"{graph_filename}.svg"))
-        pd.concat(processed_data['x'], processed_data['delta_x'], processed_data['y'], processed_data['delta_y']).to_csv(os.path.join(output_folder, f'{graph_filename}_fit_data.csv'))
+        pd.concat(processed_data['x'], processed_data['delta_x'], 
+                  processed_data['y'], processed_data['delta_y']).to_csv(os.path.join(output_folder, f'{graph_filename}_fit_data.csv'))
 
     if show:
         if debug_show:

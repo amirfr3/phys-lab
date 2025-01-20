@@ -185,7 +185,7 @@ def make_graph(
     sheet_idx,
     fit_func,
     initial_guesses,
-    output_folder=None,
+    output_folder='.',
     show=True,
     debug_show=False,
     columns=(0,1,2,3),
@@ -214,11 +214,10 @@ def make_graph(
     plt = build_plot_with_residuals(processed_data, graph_title_rtl, xsuffix=xsuffix, ysuffix=ysuffix, 
                                     show_x_residuals=show_x_residuals, latex_labels=latex_labels)
 
-    if not output_folder:
-        output_folder = "." # Default to current directory
-    with open(os.path.join(output_folder, f"{graph_title}_stats.txt"), "w") as f:
-        f.write(processed_data["fit_results"])
-    plt.savefig(os.path.join(output_folder,f"{graph_title}.svg"))
+    if output_folder is not None:
+        with open(os.path.join(output_folder, f"{graph_title}_stats.txt"), "w") as f:
+            f.write(processed_data["fit_results"])
+        plt.savefig(os.path.join(output_folder,f"{graph_title}.svg"))
 
     if show:
         if debug_show:

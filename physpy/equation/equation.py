@@ -112,12 +112,12 @@ def latexify(expr):
 
 
 def _round_value(value, error):
-    v, e = f"{ufloat(value, error):.2u}".split('+/-')
+    v, e = f"{ufloat(value, error):1.2u}".strip('()').split('+/-')
     return float(v), float(e), 
 
 
 def _round_number(value):
-    v, _ = f"{ufloat(value, 10**math.floor(math.log(abs(value), 10))):.2u}".split('+/-')
+    v, _ = f"{ufloat(value, 10**math.floor(math.log(abs(value), 10))):1.2u}".split('+/-')
     return float(v)
 
 

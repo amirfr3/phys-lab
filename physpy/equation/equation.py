@@ -140,7 +140,7 @@ def latexify_and_round_value(name, value, error=0, units=None, no_relative_error
     v, e = _round_value(value, error) if error != 0 else (_round_number(value), 0)
     p = None
     if not no_relative_error:
-        p = _round_number((error/value)*100)
+        p = _round_number(abs((error/value)*100))
     return _latexify_value(name, v, e, p, units)
 
 

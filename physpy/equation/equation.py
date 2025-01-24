@@ -117,7 +117,7 @@ def _round_value(value, error):
 
 
 def _round_number(value):
-    v, _ = f"{ufloat(value, 10**math.floor(math.log(value, 10))):.2u}".split('+/-')
+    v, _ = f"{ufloat(value, 10**math.floor(math.log(abs(value), 10))):.2u}".split('+/-')
     return float(v)
 
 

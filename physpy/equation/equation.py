@@ -115,12 +115,10 @@ def _round_value(value, error):
     s = f"{ufloat(value, error):.2u}"
     if 'e' in s:
         # Exponent factoring
-        v, e, f = re.split(r'\+/-|\(\)', s)[1:]
-
+        v, e, f = re.split(r'\+/-|\(|\)', s)[1:]
     else:
         v, e = s.split('+/-')
         f = ""
-
     return float(v), float(e), f
 
 

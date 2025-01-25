@@ -1,7 +1,7 @@
 import sympy
 from uncertainties import ufloat
 import math
-
+import re
 
 def _get_uncertainty(symbol):
     return sympy.symbols(f"Delta_{symbol.name}")
@@ -112,39 +112,49 @@ def latexify(expr):
 
 
 def _round_value(value, error):
-    v, e = f"{ufloat(value, error):1.2u}".strip('()').split('+/-')
-    return float(v), float(e), 
+    s = f"{ufloat(value, error):.2u}"
+    if '(' in s:
+        # Exponent factoring
+        v, e, f = re.split(r'\+/-|\(|\)', s)[1:]
+    else:
+        v, e = s.split('+/-')
+        f = ""
+    return float(v), float(e), f
 
 
 def _round_number(value):
-    v, _ = f"{ufloat(value, 10**math.floor(math.log(abs(value), 10))):1.2u}".split('+/-')
-    return float(v)
+    v, e, f = _round_value(value, 10**math.floor(math.log(abs(value), 10)))
+    return float(v), f
 
 
-def _latexify_value(name, value, error, relative_error, units):
+def _latexify_value(name, value, error, factor, relative_error, relative_error_factor, unit):
+    # Integer prettyfing
     if str(value).endswith(".0"):
         value = int(value)
     if str(error).endswith(".0"):
         error = int(error)
-    if str(relative_error).endswith(".0"):
+    if relative_error is not None and str(relative_error).endswith(".0"):
         relative_error = int(relative_error)
 
-    latex_str = f'{name} = \\SI' + f'{{{value}({error})}}' + '{' + (units if units is not None else '') + '}' 
+    latex_str = f'{name} = \\SI' + f'{{{value}({error}){factor}}}' + '{' + (unit if unit is not None else '') + '}' 
     if relative_error is not None:
-        latex_str += '\\,' + f'({relative_error}\\%)'
+        latex_str += '\\,' + f'(\\num{{{relative_error}{relative_error_factor}}}\\%)'
     return latex_str
 
 
-def latexify_and_round_value(name, value, error=0, units=None, no_relative_error=False):
+def latexify_and_round_value(name, value, error=0, unit=None, no_relative_error=False):
     # Currently need to supply the latex unit yourself.
     if value == 0 and error == 0:
-        v, e = 0, 0
+        v, e, f = 0, 0, ""
+    elif error == 0:
+        v, f = _round_number(value)
+        e = 0
     else:
-        v, e = _round_value(value, error) if error != 0 else (_round_number(value), 0)
-    p = None
+        v, e, f = _round_value(value, error)
+    p, pf = None, None
     if not no_relative_error:
-        p = _round_number(abs((error/value)*100))
-    return _latexify_value(name, v, e, p, units)
+        p, pf = _round_number(abs((error/value)*100))
+    return _latexify_value(name, v, e, f, p, pf, unit)
 
 
 def latexify_and_round_fit_params(fit_data, units=None):
@@ -154,10 +164,11 @@ def latexify_and_round_fit_params(fit_data, units=None):
     units += [None]*(len(fit_data['fit_params'])-len(units))
 
     for i, (param, error, unit) in enumerate(zip(fit_data['fit_params'], fit_data['fit_params_error'], units)):
-        latex_str += latexify_and_round_value(f'a_{i}', param, error, units=unit) + '\n'
+        latex_str += latexify_and_round_value(f'a_{i}', param, error, unit=unit) + '\n'
     
-    chi, chi_e = _round_number(fit_data['chi2_red']), _round_number(math.sqrt(2/fit_data['dof']))
-    latex_str += _latexify_value('\\chi^2_{red}', chi, chi_e, relative_error=None, units=None) + '\n'
+    (chi, chi_f), (chi_e, chi_ef) = _round_number(fit_data['chi2_red']), _round_number(math.sqrt(2/fit_data['dof']))
+    latex_str += '\\chi^2_{red} = ' + f'\\SI{{{chi}(0){chi_f}}}{{}}\\pm\\SI{{{chi_e}(0){chi_ef}}}{{}}\n' 
+    #latex_str += _latexify_value('\\chi^2_{red}', chi, chi_e, "", relative_error=None, relative_error_factor=None, unit=None) + '\n'
 
     latex_str += latexify_and_round_value('P_{prob}', fit_data['p_val'], no_relative_error=True) + '\n'
 

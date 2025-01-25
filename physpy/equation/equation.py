@@ -133,7 +133,7 @@ def _latexify_value(name, value, error, factor, relative_error, relative_error_f
         value = int(value)
     if str(error).endswith(".0"):
         error = int(error)
-    if str(relative_error).endswith(".0"):
+    if relative_error is not None and str(relative_error).endswith(".0"):
         relative_error = int(relative_error)
 
     latex_str = f'{name} = \\SI' + f'{{{value}({error}){factor}}}' + '{' + (unit if unit is not None else '') + '}' 
@@ -142,7 +142,7 @@ def _latexify_value(name, value, error, factor, relative_error, relative_error_f
     return latex_str
 
 
-def latexify_and_round_value(name, value, error=0, units=None, no_relative_error=False):
+def latexify_and_round_value(name, value, error=0, unit=None, no_relative_error=False):
     # Currently need to supply the latex unit yourself.
     if value == 0 and error == 0:
         v, e, f = 0, 0, ""
@@ -154,7 +154,7 @@ def latexify_and_round_value(name, value, error=0, units=None, no_relative_error
     p, pf = None, None
     if not no_relative_error:
         p, pf = _round_number(abs((error/value)*100))
-    return _latexify_value(name, v, e, f, p, pf, units)
+    return _latexify_value(name, v, e, f, p, pf, unit)
 
 
 def latexify_and_round_fit_params(fit_data, units=None):
@@ -167,7 +167,7 @@ def latexify_and_round_fit_params(fit_data, units=None):
         latex_str += latexify_and_round_value(f'a_{i}', param, error, units=unit) + '\n'
     
     chi, chi_e = _round_number(fit_data['chi2_red']), _round_number(math.sqrt(2/fit_data['dof']))
-    latex_str += _latexify_value('\\chi^2_{red}', chi, chi_e, relative_error=None, units=None) + '\n'
+    latex_str += _latexify_value('\\chi^2_{red}', chi, chi_e, relative_error=None, relative_error_factor=None, unit=None) + '\n'
 
     latex_str += latexify_and_round_value('P_{prob}', fit_data['p_val'], no_relative_error=True) + '\n'
 

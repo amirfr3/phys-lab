@@ -164,7 +164,7 @@ def build_plot_with_residuals(data, plot_name, xsuffix: Optional[str]=None, ysuf
         ax2.grid(True)
 
     plt.tight_layout()
-    return plt
+    return plt, figs
 
 
 def read_table(
@@ -223,14 +223,15 @@ def make_graph(
 
     processed_data = fit_curve(fit_func, initial_guesses, table_or_file_path, sheet_idx, columns=columns)
 
-    plt = build_plot_with_residuals(processed_data, graph_title_rtl, xsuffix=xsuffix, ysuffix=ysuffix, 
+    plt, figures = build_plot_with_residuals(processed_data, graph_title_rtl, xsuffix=xsuffix, ysuffix=ysuffix, 
                                     show_x_residuals=show_x_residuals)
 
     if output_folder is not None:
         graph_filename = graph_title.replace(' ', '_')
         with open(os.path.join(output_folder, f"{graph_filename}_stats.txt"), "w") as f:
             f.write(processed_data["fit_results"])
-        plt.savefig(os.path.join(output_folder,f"{graph_filename}.svg"))
+        for i, fig in enumerate(figures):
+            fig.savefig(os.path.join(output_folder,f"{graph_filename}_{i}.svg"), bbox_inches='tight')
         pd.concat((processed_data['x'], processed_data['delta_x'], 
                   processed_data['y'], processed_data['delta_y']), axis=1)\
         .to_csv(os.path.join(output_folder, f'{graph_filename}_fit_data.csv'), index=False)

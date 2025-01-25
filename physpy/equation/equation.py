@@ -166,7 +166,7 @@ def latexify_and_round_fit_params(fit_data, units=None):
     for i, (param, error, unit) in enumerate(zip(fit_data['fit_params'], fit_data['fit_params_error'], units)):
         latex_str += latexify_and_round_value(f'a_{i}', param, error, unit=unit) + '\n'
     
-    (chi, chi_f), (chi_e, chi_ef) = _round_number(fit_data['chi2_red'], factor=False), _round_number(math.sqrt(2/fit_data['dof']), factor=False)
+    (chi, chi_f), (chi_e, chi_ef) = _round_number(fit_data['chi2_red']), _round_number(math.sqrt(2/fit_data['dof']))
     latex_str += '\\chi^2_{red} = ' + f'\\SI{{{chi}(0){chi_f}}}{{}}\\pm\\SI{{{chi_e}(0){chi_ef}}}{{}}' 
     #latex_str += _latexify_value('\\chi^2_{red}', chi, chi_e, "", relative_error=None, relative_error_factor=None, unit=None) + '\n'
 

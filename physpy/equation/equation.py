@@ -111,12 +111,9 @@ def latexify(expr):
     return latex_str
 
 
-def _round_value(value, error, factor=True):
-    if factor:
-        s = f"{ufloat(value, error):.2u}"
-    else:
-        s = f"{ufloat(value, error):1.2u}" 
-    if 'e' in s:
+def _round_value(value, error):
+    s = f"{ufloat(value, error):.2u}"
+    if '(' in s:
         # Exponent factoring
         v, e, f = re.split(r'\+/-|\(|\)', s)[1:]
     else:
@@ -125,8 +122,8 @@ def _round_value(value, error, factor=True):
     return float(v), float(e), f
 
 
-def _round_number(value, factor=True):
-    v, e, f = _round_value(value, 10**math.floor(math.log(abs(value), 10)), factor=factor)
+def _round_number(value):
+    v, e, f = _round_value(value, 10**math.floor(math.log(abs(value), 10)))
     return float(v), f
 
 
@@ -169,8 +166,9 @@ def latexify_and_round_fit_params(fit_data, units=None):
     for i, (param, error, unit) in enumerate(zip(fit_data['fit_params'], fit_data['fit_params_error'], units)):
         latex_str += latexify_and_round_value(f'a_{i}', param, error, unit=unit) + '\n'
     
-    (chi, _), (chi_e, _) = _round_number(fit_data['chi2_red'], factor=False), _round_number(math.sqrt(2/fit_data['dof']), factor=False)
-    latex_str += _latexify_value('\\chi^2_{red}', chi, chi_e, "", relative_error=None, relative_error_factor=None, unit=None) + '\n'
+    (chi, chi_f), (chi_e, chi_ef) = _round_number(fit_data['chi2_red'], factor=False), _round_number(math.sqrt(2/fit_data['dof']), factor=False)
+    latex_str += '\\chi^2_{red} = ' + f'\\SI{{{chi}(0){chi_f}}}{{}}\\pm\\SI{{{chi_e}(0){chi_ef}}}{{}}' 
+    #latex_str += _latexify_value('\\chi^2_{red}', chi, chi_e, "", relative_error=None, relative_error_factor=None, unit=None) + '\n'
 
     latex_str += latexify_and_round_value('P_{prob}', fit_data['p_val'], no_relative_error=True) + '\n'
 

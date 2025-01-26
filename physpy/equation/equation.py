@@ -129,7 +129,7 @@ def _round_number(value):
 
 def _latexify_value(name, value: float, error, factor, relative_error, relative_error_factor, unit):
     # Integer prettyfing
-    if value.is_integer():
+    if isinstance(value, float) and value.is_integer():
         value = int(value)
     if isinstance(error, float) and error.is_integer():
         error = int(error)

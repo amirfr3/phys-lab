@@ -127,16 +127,16 @@ def _round_number(value):
     return float(v), f
 
 
-def _latexify_value(name, value, error, factor, relative_error, relative_error_factor, unit):
+def _latexify_value(name, value: float, error, factor, relative_error, relative_error_factor, unit):
     # Integer prettyfing
-    if str(value).endswith(".0"):
+    if value.is_integer():
         value = int(value)
-    if str(error).endswith(".0"):
+    if error.is_integer():
         error = int(error)
-    if relative_error is not None and str(relative_error).endswith(".0"):
+    if relative_error is not None and relative_error.is_integer():
         relative_error = int(relative_error)
 
-    latex_str = f'{name} = \\SI' + f'{{{value}({error}){factor}}}' + '{' + (unit if unit is not None else '') + '}' 
+    latex_str = f'{name} = \\SI' + f'{{{value:f}({error:f}){factor}}}' + '{' + (unit if unit is not None else '') + '}' 
     if relative_error is not None:
         latex_str += '\\,' + f'(\\num{{{relative_error}{relative_error_factor}}}\\%)'
     return latex_str
@@ -167,7 +167,7 @@ def latexify_and_round_fit_params(fit_data, units=None):
         latex_str += latexify_and_round_value(f'a_{i}', param, error, unit=unit) + '\n'
     
     (chi, chi_f), (chi_e, chi_ef) = _round_number(fit_data['chi2_red']), _round_number(math.sqrt(2/fit_data['dof']))
-    latex_str += '\\chi^2_{red} = ' + f'\\SI{{{chi}(0){chi_f}}}{{}}\\pm\\SI{{{chi_e}(0){chi_ef}}}{{}}\n' 
+    latex_str += '\\chi^2_{red} = ' + f'\\SI{{{chi:f}(0){chi_f}}}{{}}\\pm\\SI{{{chi_e:f}(0){chi_ef}}}{{}}\n' 
     #latex_str += _latexify_value('\\chi^2_{red}', chi, chi_e, "", relative_error=None, relative_error_factor=None, unit=None) + '\n'
 
     latex_str += latexify_and_round_value('P_{prob}', fit_data['p_val'], no_relative_error=True) + '\n'

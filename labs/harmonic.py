@@ -93,7 +93,7 @@ def calculate_spring_constant_and_uncertainty(m, x_i, x_f, g):
 
 def remove_outliers(xt_table):
     # 1. Remove first few entries due to rounding error in the program
-    xt_table = xt_table[5:]
+    # xt_table = xt_table[5:]
     return xt_table
 
 
@@ -120,15 +120,88 @@ def parse_position_data(filename):
     )
 
     xt_table = remove_outliers(xt_table)
+    optimize_sine_fit(xt_table)
     return xt_table
 
 
-def generate_oscillation_graph(measurement_filename, guess=(0, 3.7, 0, 0), should_show=False):
+def optimize_sine_fit(xt_table):
+    import numpy as np
+    from scipy.optimize import leastsq
+    import pylab as plt
+
+    data = xt_table["Position [m]"]
+    N = len(data)  # number of data points
+    t = np.linspace(0, 4 * np.pi, N)
+    # f = 1.15247 # Optional!! Advised not to use
+    # data = 3.0*np.sin(f*t+0.001) + 0.5 + np.random.randn(N) # create artificial data with noise
+
+    do_guess = False
+    do_fft = False
+
+    if do_guess:
+        guess_mean = np.mean(data)
+        guess_std = 3 * np.std(data) / (2**0.5) / (2**0.5)
+        guess_phase = 0
+        guess_freq = 1
+        guess_amp = 1
+
+        # we'll use this to plot our first estimate. This might already be good enough for you
+        data_first_guess = guess_std * np.sin(t + guess_phase) + guess_mean
+
+        # Define the function to optimize, in this case, we want to minimize the difference
+        # between the actual data and our "guessed" parameters
+        optimize_func = lambda x: x[0] * np.sin(x[1] * t + x[2]) + x[3] - data
+        est_amp, est_freq, est_phase, est_mean = leastsq(
+            optimize_func, [guess_amp, guess_freq, guess_phase, guess_mean]
+        )[0]
+
+        # recreate the fitted curve using the optimized parameters
+        data_fit = est_amp * np.sin(est_freq * t + est_phase) + est_mean
+
+        # recreate the fitted curve using the optimized parameters
+
+        fine_t = np.arange(0, max(t), 0.1)
+        data_fit = est_amp * np.sin(est_freq * fine_t + est_phase) + est_mean
+
+        plt.plot(t, data, ".")
+        plt.plot(t, data_first_guess, label="first guess")
+        plt.plot(fine_t, data_fit, label="after fitting")
+        plt.legend()
+        plt.show()
+
+        return guess_mean, guess_std, guess_phase, guess_freq, guess_amp
+
+    if do_fft:
+        mfft = np.fft.fft(data)
+        imax = np.argmax(np.absolute(mfft))
+        mask = np.zeros_like(mfft)
+        mask[[imax]] = 1
+        mfft *= mask
+        fdata = np.fft.ifft(mfft)
+
+        plt.plot(t, data, ".")
+        plt.plot(t, fdata, ".", label="FFT")
+        plt.legend()
+        plt.show()
+
+        return None
+
+
+def generate_oscillation_graph(
+    measurement_filename, guess=(0, 3.7, 0, 0), should_show=False
+):
     pos_table = parse_position_data(measurement_filename)
+
+    _, part, num = measurement_filename.split("\\")[-1].split("_")
+
+    part_str = {"a": "א'", "b": "ב'"}[part]
+    num_str = num[::-1]
+
+    graph_name = f"גרף תנודה - חלק {part_str} מדידה {num_str}"
 
     # NOTE: This is NOT shown by default
     fit_data = physpy.graph.make_graph(
-        "גרף תנודה - " + measurement_filename.split("\\")[-1],  # .split(".")[0],
+        graph_name,
         pos_table,
         None,
         physpy.graph.fit.sinusoidal,
@@ -214,12 +287,27 @@ def generate_period_graph(fit_data_list, table, x_col):
         axis=1,
     )
 
+    i = {
+        "Length [m]": 0,
+        "Mass [kg]": 1,
+    }[x_col]
+
+    graph_name = [
+        "ריבוע זמן מחזור מטוטלת מתמטית כתלות באורך החוט",
+        "ריבוע זמן מחזור מסה תלויה על קפיץ כתלות במסה",
+    ][i]
+
+    initial_guess = [
+        (0, 4*(math.pi**2)/9.81),
+        (0, 4*(math.pi**2)/25),      
+    ][i]
+
     fit_data = physpy.graph.make_graph(
-        "גרף תנודה - " + x_col,
+        graph_name,
         fit_table,
         None,
         physpy.graph.fit.linear,
-        (0, 0),
+        initial_guess,
         output_folder=RESULTS_FOLDER,
         show=True,
     )
@@ -254,6 +342,7 @@ def main():
     sympy.init_printing()
 
     datasheet = DATASHEET_PATH
+    physpy.graph.single_picture_graphs(True)
 
     # Read params sheet into global namespace
     read_params(datasheet)
@@ -273,9 +362,15 @@ def main():
         r"C:\Users\flami\OneDrive\School\SemA\LabA\Harmonic\results\measurements\part_a",
     )
     pendulum_table = physpy.graph.read_table(datasheet, "Fit_Simple_Nimo")
-    pendulum_table = physpy.graph.convert_units(pendulum_table, "Length [cm]", "Length [m]", lambda x: x / 100)
-    pendulum_table = physpy.graph.convert_units(pendulum_table, "delta_Length [cm]", "delta_Length [m]", lambda x: x / 100)
-    pendulum_fit_data = generate_period_graph(pendulum_oscillation_data, pendulum_table, "Length [m]")
+    pendulum_table = physpy.graph.convert_units(
+        pendulum_table, "Length [cm]", "Length [m]", lambda x: x / 100
+    )
+    pendulum_table = physpy.graph.convert_units(
+        pendulum_table, "delta_Length [cm]", "delta_Length [m]", lambda x: x / 100
+    )
+    pendulum_fit_data = generate_period_graph(
+        pendulum_oscillation_data, pendulum_table, "Length [m]"
+    )
 
     g_theo = P_g
     print(f"Theoretical gravity constant: {get_value_error(*g_theo)}")
@@ -293,7 +388,9 @@ def main():
         r"C:\Users\flami\OneDrive\School\SemA\LabA\Harmonic\results\measurements\part_b",
     )
     spring_table = physpy.graph.read_table(datasheet, "Fit_Spring")
-    spring_fit_data = generate_period_graph(spring_oscillation_data, spring_table, "Mass [kg]")
+    spring_fit_data = generate_period_graph(
+        spring_oscillation_data, spring_table, "Mass [kg]"
+    )
 
     # Compare spring constant to expected value
     k_theo = calculate_spring_constant_and_uncertainty(P_dx_m, P_x1, P_x0, P_g)

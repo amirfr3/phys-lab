@@ -133,7 +133,7 @@ def _to_striped_float_str(value, error=0):
     value_s, error_s = f'{value:f}'.rstrip('0'), f'{error:f}'.rstrip('0')
     digits_after_dot = max((value_s[::-1].index('.'), error_s[::-1].index('.')))
     value_s = value_s[:value_s.index('.')+1] + value_s[value_s.index('.')+1:].ljust(digits_after_dot, '0')
-    error_s = error_s[:error_s.index('.')+1] + error_s[error_s.index('.')+1:].liust(digits_after_dot, '0')
+    error_s = error_s[:error_s.index('.')+1] + error_s[error_s.index('.')+1:].ljust(digits_after_dot, '0')
     return value_s.rstrip('.'), error_s.rstrip('.')  # Remove point if integers
 
 def _latexify_value(name, value, error, factor, relative_error, relative_error_factor, unit):

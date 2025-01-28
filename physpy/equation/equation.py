@@ -142,7 +142,7 @@ def _latexify_value(name, value: float, error, factor, relative_error, relative_
     return latex_str
 
 
-def latexify_and_round_value(name, value, error=0, unit=None, no_relative_error=False):
+def latexify_and_round_value(name, value, error=0, unit=None, relative_error=True):
     # Currently need to supply the latex unit yourself.
     if value == 0 and error == 0:
         v, e, f = 0, 0, ""
@@ -152,7 +152,7 @@ def latexify_and_round_value(name, value, error=0, unit=None, no_relative_error=
     else:
         v, e, f = _round_value(value, error)
     p, pf = None, None
-    if not no_relative_error:
+    if relative_error and v != 0:
         p, pf = _round_number(abs((error/value)*100))
     return _latexify_value(name, v, e, f, p, pf, unit)
 
@@ -166,11 +166,12 @@ def latexify_and_round_fit_params(fit_data, units=None):
     for i, (param, error, unit) in enumerate(zip(fit_data['fit_params'], fit_data['fit_params_error'], units)):
         latex_str += latexify_and_round_value(f'a_{i}', param, error, unit=unit) + '\n'
     
-    (chi, chi_f), (chi_e, chi_ef) = _round_number(fit_data['chi2_red']), _round_number(math.sqrt(2/fit_data['dof']))
-    latex_str += '\\chi^2_{red} = ' + f'\\SI{{{chi:f}(0){chi_f}}}{{}}\\pm\\SI{{{chi_e:f}(0){chi_ef}}}{{}}\n' 
+    latex_str += latexify_and_round_value('\\chi^2_{red}', fit_data['chi2_red'], marh.sqrt(2/fit_data['dof']), relative_error=False)
+    #(chi, chi_f), (chi_e, chi_ef) = _round_number(fit_data['chi2_red']), _round_number(math.sqrt(2/fit_data['dof']))
+    #latex_str += '\\chi^2_{red} = ' + f'\\SI{{{chi:f}(0){chi_f}}}{{}}\\pm\\SI{{{chi_e:f}(0){chi_ef}}}{{}}\n' 
     #latex_str += _latexify_value('\\chi^2_{red}', chi, chi_e, "", relative_error=None, relative_error_factor=None, unit=None) + '\n'
 
-    latex_str += latexify_and_round_value('P_{prob}', fit_data['p_val'], no_relative_error=True) + '\n'
+    latex_str += latexify_and_round_value('P_{prob}', fit_data['p_val'], relative_error=False) + '\n'
 
     return latex_str
 
@@ -181,7 +182,7 @@ def latexify_nsigma(nsigma, val1=None, val2=None):
             raise ValueError("Need both value names")
         values = f"({val1},\\:{val2})"
         
-    return latexify_and_round_value("N_{\\sigma}" + values,  nsigma, no_relative_error=True)
+    return latexify_and_round_value("N_{\\sigma}" + values,  nsigma, relative_error=False)
 
 def calculate_value_with_uncertainty(expr, val_dict):
     # Get symbols

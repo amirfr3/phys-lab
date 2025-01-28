@@ -111,7 +111,7 @@ def latexify(expr):
     return latex_str
 
 
-def _round_value(value, error):
+def _to_rounded_value_str(value, error):
     s = f"{ufloat(value, error):.2u}"
     if '(' in s:
         # Exponent factoring
@@ -119,41 +119,33 @@ def _round_value(value, error):
     else:
         v, e = s.split('+/-')
         f = ""
-    return float(v), float(e), f
+    return v, e, f
 
 
-def _round_number(value):
-    v, e, f = _round_value(value, 10**math.floor(math.log(abs(value), 10)))
-    return float(v), f
+def _to_rounded_number_str(value):
+    v, e, f = _to_rounded_value_str(value, 10**math.floor(math.log(abs(value), 10)))
+    return v, f
 
 
-def _latexify_value(name, value: float, error, factor, relative_error, relative_error_factor, unit):
-    # Integer prettyfing
-    if isinstance(value, float) and value.is_integer():
-        value = int(value)
-    if isinstance(error, float) and error.is_integer():
-        error = int(error)
-    if relative_error is not None and relative_error.is_integer():
-        relative_error = int(relative_error)
-
-    latex_str = f'{name} = \\SI' + f'{{{value:f}({error:f}){factor}}}' + '{' + (unit if unit is not None else '') + '}' 
+def _latexify_value(name, value: str, error: str, factor, relative_error: str, relative_error_factor, unit):
+    latex_str = f'{name} = \\SI' + f'{{{value}({error}){factor}}}' + '{' + (unit if unit is not None else '') + '}' 
     if relative_error is not None:
         latex_str += '\\,' + f'(\\num{{{relative_error}{relative_error_factor}}}\\%)'
     return latex_str
 
 
-def latexify_and_round_value(name, value, error=0, unit=None, no_relative_error=False):
+def latexify_and_round_value(name, value, error=0, unit=None, relative_error=True):
     # Currently need to supply the latex unit yourself.
     if value == 0 and error == 0:
         v, e, f = 0, 0, ""
     elif error == 0:
-        v, f = _round_number(value)
+        v, f = _to_rounded_number_str(value)
         e = 0
     else:
-        v, e, f = _round_value(value, error)
+        v, e, f = _to_rounded_value_str(value, error)
     p, pf = None, None
-    if not no_relative_error:
-        p, pf = _round_number(abs((error/value)*100))
+    if relative_error and v != 0:
+        p, pf = _to_rounded_number_str(abs((error/value)*100))
     return _latexify_value(name, v, e, f, p, pf, unit)
 
 
@@ -166,11 +158,8 @@ def latexify_and_round_fit_params(fit_data, units=None):
     for i, (param, error, unit) in enumerate(zip(fit_data['fit_params'], fit_data['fit_params_error'], units)):
         latex_str += latexify_and_round_value(f'a_{i}', param, error, unit=unit) + '\n'
     
-    (chi, chi_f), (chi_e, chi_ef) = _round_number(fit_data['chi2_red']), _round_number(math.sqrt(2/fit_data['dof']))
-    latex_str += '\\chi^2_{red} = ' + f'\\SI{{{chi:f}(0){chi_f}}}{{}}\\pm\\SI{{{chi_e:f}(0){chi_ef}}}{{}}\n' 
-    #latex_str += _latexify_value('\\chi^2_{red}', chi, chi_e, "", relative_error=None, relative_error_factor=None, unit=None) + '\n'
-
-    latex_str += latexify_and_round_value('P_{prob}', fit_data['p_val'], no_relative_error=True) + '\n'
+    latex_str += latexify_and_round_value('\\chi^2_{red}', fit_data['chi2_red'], math.sqrt(2/fit_data['dof']), relative_error=False) + '\n'
+    latex_str += latexify_and_round_value('P_{prob}', fit_data['p_val'], relative_error=False) + '\n'
 
     return latex_str
 
@@ -181,7 +170,7 @@ def latexify_nsigma(nsigma, val1=None, val2=None):
             raise ValueError("Need both value names")
         values = f"({val1},\\:{val2})"
         
-    return latexify_and_round_value("N_{\\sigma}" + values,  nsigma, no_relative_error=True)
+    return latexify_and_round_value("N_{\\sigma}" + values,  nsigma, relative_error=False)
 
 def calculate_value_with_uncertainty(expr, val_dict):
     # Get symbols

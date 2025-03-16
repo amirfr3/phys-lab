@@ -1,6 +1,7 @@
 from . import equation
 from . import graph
 from . import table
+from . import utils
 
 # Convenience imports
 import math

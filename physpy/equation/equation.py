@@ -7,7 +7,7 @@ from ..utils.utils import get_value_error
 
 
 def _get_uncertainty(symbol):
-    return sympy.symbols(f"Delta_{symbol.name}")
+    return sympy.symbols(f"delta_{symbol.name}")
     # return sympy.parsing.latex.parse_latex(f"\\Delta{{{symbol.name}}}")
 
 
@@ -36,8 +36,8 @@ class Symbol:
     name: str
     sym: sympy.Symbol
     delta_sym: sympy.Symbol
-    val: float
-    delta_val: float
+    _val: float
+    _delta_val: float
     expr: sympy.Eq = None
     delta_expr: sympy.Eq = None
 
@@ -49,15 +49,31 @@ class Symbol:
             self.delta_expr = sympy.Eq(self.delta_sym, delta_expr)
 
     def calculate_value(self, subs):
-        self.val = self.expr.rhs.subs(subs)
-        self.delta_val = self.delta_expr.rhs.subs(subs)
+        self.value = self.expr.rhs.subs(subs)
+        self.delta = self.delta_expr.rhs.subs(subs)
 
         # TODO: Assert that an actual value is received? Rather than expression with missing values
 
-        return self.val, self.delta_val
+        return self.value, self.delta
+
+    @property
+    def value(self):
+        return float(self._val)
+    
+    @value.setter
+    def value(self, v):
+        self._val = float(v)
+
+    @property
+    def delta(self):
+        return float(self._delta_val)
+    
+    @delta.setter
+    def delta(self, v):
+        self._delta_val = float(v)
 
     def __str__(self):
-        return f"{self.name}: {get_value_error(self.val, self.delta_val)}"
+        return f"{self.name}: {get_value_error(self.value, self.delta)}"
 
 
 @dataclass
@@ -80,8 +96,8 @@ class SymbolTable:
 
     def values(self):
         v = {}
-        v.update({s.sym: s.val for s in self.symbols.values()})
-        v.update({s.delta_sym: s.delta_val for s in self.symbols.values()})
+        v.update({s.sym: s.value for s in self.symbols.values()})
+        v.update({s.delta_sym: s.delta for s in self.symbols.values()})
         return v
 
     # This is order dependant and buggy :(
@@ -299,7 +315,7 @@ def latexify_nsigma(nsigma, val1=None, val2=None):
     )
 
 
-def calculate_value_with_uncertainty(expr, val_dict):
+# def calculate_value_with_uncertainty(expr, val_dict):
     # Get symbols
     # Get uncertainties symbols
     # Separate val_dict into values dict and uncertainties dict
@@ -310,4 +326,4 @@ def calculate_value_with_uncertainty(expr, val_dict):
     # sympy.sqrt(sum([(expr.diff(s)*sympy.symbols(f"d{s.name}"))**2 for s in expr.free_symbols]))
     # sigma*sympy.sqrt(sum([(sympy.symbols(f"d{s.name}")/s)**2 for s in sigma.free_symbols]))
     # (d_sigma - d_sigma_2).simplify()
-    pass
+    # pass

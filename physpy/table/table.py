@@ -1,5 +1,7 @@
 import pandas as pd
 from dataclasses import dataclass
+from ..equation.equation import calculate_indirect_error_formula, get_symbols_with_uncertainties
+import sympy
 
 @dataclass
 class Parameter:
@@ -35,12 +37,16 @@ def parse_data(filepath):
     params = None
     with pd.ExcelFile(filepath) as xl:
         for sheet in xl.sheet_names:
-            if sheet.lower().endswith('_fit'):
-                fit_tables[sheet.replace('_fit', '')] = pd.read_excel(xl, sheet)
-            elif sheet.lower().startswith('fit_'):
-                fit_tables[sheet.replace('fit_', '')] = pd.read_excel(xl, sheet)
-            elif sheet.lower() == 'params':
+            if sheet.lower() == 'params':
                 params = _parse_params(pd.read_excel(xl, sheet))
+                continue
+
+            FIT_TAGS = ['_fit', '_Fit', 'fit_', 'Fit_']
+
+            for fit_tag in FIT_TAGS:
+                if fit_tag in sheet:
+                    fit_tables[sheet.replace(fit_tag, '').lower()] = pd.read_excel(xl, sheet)
+                    break
 
     return fit_tables, params
 
@@ -80,3 +86,38 @@ def flip_table_axis(table):
     table = table[[table.columns[2], table.columns[3], table.columns[0], table.columns[1]]]
     return table
 
+
+def convert_value(
+    table,
+    symbol_dict,
+    col_name,
+    expr,
+    delta_expr=None,
+):
+    v_l = []
+    dv_l = []
+
+    # Generate dummy variables for expressions
+    v_sym, dv_sym = get_symbols_with_uncertainties("v")
+    expr = sympy.Eq(v_sym, expr)
+    if delta_expr:
+        delta_expr = sympy.Eq(dv_sym, expr)
+    if not delta_expr:
+        delta_expr = calculate_indirect_error_formula(expr)
+
+    # Reduce table to relevant columns
+    # table = table[symbol_dict.keys()]
+
+    # col_dict = {
+    #     key: table[symbol_dict[key]] for key in symbol_dict.keys()
+    # }
+
+    for row in [s for _, s in table.iterrows()]:
+        val_dict = {}
+        for key in symbol_dict.keys():
+            val_dict[key] = row[symbol_dict[key]]
+        
+        v_l.append(float(expr.rhs.subs(val_dict)))
+        dv_l.append(float(delta_expr.rhs.subs(val_dict)))
+
+    return pd.Series(v_l, name=col_name), pd.Series(dv_l, name=f"delta_{col_name}")

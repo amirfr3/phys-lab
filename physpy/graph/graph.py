@@ -2,6 +2,7 @@ import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 from .fit import fit_curve
 from typing import Optional
 
@@ -9,9 +10,11 @@ from typing import Optional
 _SINGLE_PICTURE_GRAPHS = False
 _LATEX_WRAP = False
 
+
 def single_picture_graphs(b: bool):
     global _SINGLE_PICTURE_GRAPHS
     _SINGLE_PICTURE_GRAPHS = b
+
 
 def latex_labels(b: bool):
     global _LATEX_WRAP
@@ -28,53 +31,66 @@ def _is_hebrew(s):
     return any(c in s for c in 'אבגדהוזחטיכלמנסעפצקרשת')
 
 
-def build_plot_with_residuals(data, plot_name, xsuffix: Optional[str]=None, ysuffix: Optional[str]=None, show_x_residuals=False):
-    plt.close("all")
-    if _SINGLE_PICTURE_GRAPHS:
-        fig1, axs = plt.subplots(1, 2, figsize=(15, 6))
-        figs = [fig1]
-    else:
-        figs = []
-        axs = []
-        fig1, ax1 = plt.subplots(1, 1, figsize=(8,6))
-        figs.append(fig1)
-        axs.append(ax1)
-        fig1, ax1 = plt.subplots(1, 1, figsize=(8,6))
-        figs.append(fig1)
-        axs.append(ax1)
+def _scatter_data(figure, data_x, data_y, error_x, error_y):
+    figure.add_trace(go.Scatter(x=data_x, y=data_y,
+                mode='markers', 
+                error_x=dict(type='data',
+                             array=error_x,
+                             color='grey'), 
+                error_y=dict(type='data',
+                             array=error_y,
+                             color='grey'),
+                marker=dict(color='blue')))
 
-    if show_x_residuals:
-        fig2, ax2 = plt.subplots(1, 1, figsize=(7, 6))
-        figs.append(fig2)
 
-    plt.style.use("classic")
+def _plot_layout(figure, plot_title, x_title, y_title):
+    figure.update_layout(
+        plot_bgcolor='white',
+        showlegend=False,
+        title=dict(
+            text=plot_title,
+            x=0.5,
+            xanchor='center',
+            font=dict(
+                size=30
+            )
+        ),
+        xaxis=dict(
+            title=dict(
+                text=x_title,
+                font=dict(size=20)),
+            showgrid=True,
+            linecolor='grey',
+            linewidth=2,
+            ticks='outside',
+            gridcolor='lightgrey',
+            zerolinecolor='lightgrey',
+            zerolinewidth=1
+        ),
+        yaxis=dict(
+            title=dict(
+                text=y_title,
+                font=dict(size=20)),
+            showgrid=True,
+            linecolor='grey',
+            linewidth=2,
+            ticks='outside',
+            gridcolor='lightgrey',
+            zerolinecolor='lightgrey',
+            zerolinewidth=1
+        ),
+    )
 
-    for fig in figs:
-        fig.patch.set_facecolor("white")
 
-    for ax in axs:
-        ax.set_facecolor("white")
-    if show_x_residuals:
-        ax2.set_facecolor("white")
+def _fit_plot(data, plot_name: Optional[str]=None, xsuffix: Optional[str]=None, ysuffix: Optional[str]=None):
+    fit_figure = go.Figure()
 
-    x_fit = np.linspace(min(data["x"]), max(data["x"]), 10 * len(data["x"]))
+    x_fit = np.linspace(min(data['x']), max(data['x']), 10 * len(data['x']))
+
     y_fit = data["fit_func"](data["fit_params"], x_fit)
-    axs[0].errorbar(
-        data["x"],
-        data["y"],
-        xerr=data["delta_x"],
-        yerr=data["delta_y"],
-        fmt=".b",
-        label="Data",
-        ecolor="gray",
-    )  # Change the label if needed
-    axs[0].plot(
-        x_fit, y_fit, label="Fit", c="r", alpha=0.5
-    )  # Change the label if needed
+    fit_figure.add_trace(go.Scatter(x=x_fit, y=y_fit, mode='lines', line=dict(color='red')))
+    _scatter_data(fit_figure, data['x'], data['y'], data['delta_x'], data['delta_y'])
 
-    # If you want to plot multiple functions, change here the relevant parameters (x, y, xerr, yerr, label). Otherwise, uncomment the 2 next lines:
-    # axs[0].errorbar(data["x"] + 0.2, data["y"] + 0.3, xerr=data["delta_x"], yerr=data["delta_y"], fmt='.g', label='Data', ecolor='gray')
-    # axs[0].plot(x_fit + 0.2, y_fit + 0.3, label='Fit', c='k', alpha=0.5)
     sep = '\\,' if _LATEX_WRAP else ' '
     x_label_suffix = sep.join(((data['columns'][0].split()[1] if len(data['columns'][0].split()) > 1 else ''),
         (xsuffix if xsuffix is not None else '')))
@@ -83,88 +99,54 @@ def build_plot_with_residuals(data, plot_name, xsuffix: Optional[str]=None, ysuf
         (ysuffix if ysuffix is not None else '')))
     y_label = data['columns'][2].split()[0]
 
-    axs[0].set_title(plot_name)  # Add here the full title for the fit
-    axs[0].set_xlabel(
+    _plot_layout(fit_figure, plot_name, _latex_wrap(f'{x_label}{sep}{x_label_suffix}'), _latex_wrap(f'{y_label}{sep}{y_label_suffix}'))
+
+    return fit_figure
+
+
+def _residual_plot(data, data_x, residuals, error_x, error_y, plot_name:Optional[str]=None, xsuffix: Optional[str]=None, ysuffix: Optional[str]=None, 
+                    fit_func_name:Optional[str]='fit', title_suffix:Optional[str]=' - Residuals', title_suffix_hebrew:Optional[str]=" - גרף שארים"):
+    residual_figure = go.Figure()
+
+    _scatter_data(residual_figure, data_x, residuals, error_x, error_y)
+
+    # Add zero line
+    residual_figure.add_hline(y=0, line_width=3, line_dash="dash", line_color="red")
+
+    if plot_name is not None:
+        plot_name = plot_name + title_suffix_hebrew if _is_hebrew(plot_name) else plot_name + title_suffix
+
+    sep = '\\,' if _LATEX_WRAP else ' '
+    x_label_suffix = sep.join(((data['columns'][0].split()[1] if len(data['columns'][0].split()) > 1 else ''),
+        (xsuffix if xsuffix is not None else '')))
+    x_label = data['columns'][0].split()[0]
+    y_label_suffix = sep.join(((data['columns'][2].split()[1] if len(data['columns'][2].split()) > 1 else ''),
+        (ysuffix if ysuffix is not None else '')))
+    y_label = data['columns'][2].split()[0]
+    
+    _plot_layout(residual_figure, plot_name, 
         _latex_wrap(f'{x_label}{sep}{x_label_suffix}'),
-        fontsize=12 if _LATEX_WRAP else 10
-    )  # Change x-axis label if needed
-    axs[0].set_ylabel(
-        _latex_wrap(f'{y_label}{sep}{y_label_suffix}'),
-        fontsize=12 if _LATEX_WRAP else 10
-    )  # Change y-axis label if needed
-
-    axs[0].grid(True)
-    # axs[0].legend()
-
-    axs[1].errorbar(
-        data["x"],
-        data["residuals"],
-        xerr=data["delta_x"],
-        yerr=data["delta_y"],
-        fmt=".b",
-        label="Data",
-        ecolor="gray",
+        _latex_wrap(f'{y_label} - {fit_func_name}({x_label}){sep}{y_label_suffix}')
     )
-    #axs[1].hlines(0, min(data["x"]), max(data["x"]), colors="r", linestyles="dashed")
-    axs[1].axhline(0, color="r", linestyle="dashed")
 
-    if _is_hebrew(plot_name):
-        axs[1].set_title(
-            " - גרף שארים"[::-1] + plot_name
-        )  # Add here the full title for the residuals
-    else:
-        axs[1].set_title(
-            plot_name + " - Residuals"
-        )  # Add here the full title for the residuals
+    return residual_figure
 
-    axs[1].set_xlabel(
-        _latex_wrap(f'{x_label}{sep}{x_label_suffix}'),
-        fontsize=12 if _LATEX_WRAP else 10
-    )  # Change column names if needed
-    axs[1].set_ylabel(
-        _latex_wrap(f'{y_label} - fit({x_label}){sep}{y_label_suffix}'),
-        fontsize=12 if _LATEX_WRAP else 10
-    )  # Change column names if needed
 
-    axs[1].grid(True)
-    # axs[1].legend()
-    if show_x_residuals:
+def build_plot_with_residuals(data, plot_name:Optional[str]= None, xsuffix: Optional[str]=None, ysuffix: Optional[str]=None, x_residuals=False):
+    # For now, only single pic graphs
+    fit_figure = _fit_plot(data, plot_name, xsuffix, ysuffix)
+    residual_figure = _residual_plot(data, data['x'], data['residuals'], data['delta_x'], data['delta_y'], plot_name)
+    if x_residuals:
         if data['x_residuals'] is None:
             raise TypeError('No inverse function for the chosen fit function. consider defining it and adding it to to INVERSE_FUNCTION dict.')
 
-        ax2.errorbar(
-            data["y"],
-            data["x_residuals"],
-            xerr=data["delta_y"],
-            yerr=data["delta_x"],
-            fmt=".b",
-            label="Data",
-            ecolor="gray",
-        )
-        #ax2.hlines(0, min(data["y"]), max(data["y"]), colors="r", linestyles="dashed")
-        ax2.axhline(0, color="r", linestyle="dashed")
+        x_residual_figure = _residual_plot(data, data['y'], data['x_residuals'], data['delta_y'], data['delta_x'], plot_name, 
+                                            fit_func_name='fit^1', title_suffix='- X Axis Residuals')
+        return fit_figure, residual_figure, x_residual_figure
 
-        if _is_hebrew(plot_name):
-            ax2.set_title(
-                " - גרף שארים בציר x"[::-1] + plot_name
-            )  # Add here the full title for the residuals
-        else:
-            ax2.set_title(
-                plot_name + " - X Axis Residuals"
-            )  # Add here the full title for the residuals
-        ax2.set_xlabel(
-            _latex_wrap(f'{y_label}{sep}{y_label_suffix}'),
-            fontsize=12 if _LATEX_WRAP else 10
-        )  # Change column names if needed
-        ax2.set_ylabel(
-            _latex_wrap(f'{x_label} - fit^-1({y_label}){sep}{x_label_suffix}'),
-            fontsize=12 if _LATEX_WRAP else 10
-        )  # Change column names if needed
-
-        ax2.grid(True)
-
-    plt.tight_layout()
-    return plt, figs
+    fit_figure.show()
+    residual_figure.show()
+    return fit_figure, residual_figure
 
 
 def read_table(
@@ -217,21 +199,23 @@ def make_graph(
 
     # Reverse Hebrew RTL
     if _is_hebrew(graph_title):
-        graph_title_rtl = graph_title[::-1]
+        #graph_title_rtl = graph_title[::-1]
+        graph_title_rtl = graph_title
     else:
         graph_title_rtl = graph_title
 
     processed_data = fit_curve(fit_func, initial_guesses, table_or_file_path, sheet_idx, columns=columns)
 
-    plt, figures = build_plot_with_residuals(processed_data, graph_title_rtl, xsuffix=xsuffix, ysuffix=ysuffix, 
-                                    show_x_residuals=show_x_residuals)
+    figures = build_plot_with_residuals(processed_data, graph_title, xsuffix=xsuffix, ysuffix=ysuffix, 
+                                    x_residuals=show_x_residuals)
 
     if output_folder is not None:
         graph_filename = graph_title.replace(' ', '_')
         with open(os.path.join(output_folder, f"{graph_filename}_stats.txt"), "w") as f:
             f.write(processed_data["fit_results"])
         for i, fig in enumerate(figures):
-            fig.savefig(os.path.join(output_folder,f"{graph_filename}_{i}.svg"), bbox_inches='tight')
+            fig.write_image(os.path.join(output_folder, f"{graph_filename}_{i}.svg"))
+            #fig.savefig(os.path.join(output_folder,f"{graph_filename}_{i}.svg"), bbox_inches='tight')
         pd.concat((processed_data['x'], processed_data['delta_x'], 
                   processed_data['y'], processed_data['delta_y']), axis=1)\
         .to_csv(os.path.join(output_folder, f'{graph_filename}_fit_data.csv'), index=False)
@@ -242,9 +226,7 @@ def make_graph(
                 f"=== EXAMPLE DATA FOR {graph_title_rtl} ===\n{processed_data['data'][:5]}\n================="
             )
             print(processed_data["fit_results"])
-        plt.show()
-    else:
-        plt.close("all")
+        (fig.show() for fig in figures)
 
     if processed_data['outliers'] and print_outliers:
         print("**OUTLIERS**")

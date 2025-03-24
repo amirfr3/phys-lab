@@ -98,7 +98,9 @@ def _fit_plot(data, plot_name: Optional[str]=None, xsuffix: Optional[str]=None, 
         (ysuffix if ysuffix is not None else '')))
     y_label = data['columns'][2].split()[0]
 
-    _plot_layout(fit_figure, plot_name, _latex_wrap(f'{x_label}{sep}{x_label_suffix}'), _latex_wrap(f'{y_label}{sep}{y_label_suffix}'))
+    _plot_layout(fit_figure, plot_name, 
+                 _latex_wrap(f'{x_label}{sep}{x_label_suffix}'.replace('~', r'\sim')), 
+                 _latex_wrap(f'{y_label}{sep}{y_label_suffix}'.replace('~', r'\sim')))
 
     return fit_figure
 
@@ -124,8 +126,8 @@ def _residual_plot(data, data_x, residuals, error_x, error_y, plot_name:Optional
     y_label = data['columns'][2].split()[0]
     
     _plot_layout(residual_figure, plot_name, 
-        _latex_wrap(f'{x_label}{sep}{x_label_suffix}'),
-        _latex_wrap(f'{y_label} - {fit_func_name}({x_label}){sep}{y_label_suffix}')
+        _latex_wrap(f'{x_label}{sep}{x_label_suffix}'.replace('~', r'\sim')),
+        _latex_wrap(f'{y_label} - {fit_func_name}({x_label}){sep}{y_label_suffix}'.replace('~', r'\sim'))
     )
 
     return residual_figure
@@ -143,8 +145,6 @@ def build_plot_with_residuals(data, plot_name:Optional[str]= None, xsuffix: Opti
                                             fit_func_name='fit^1', title_suffix='- X Axis Residuals')
         return fit_figure, residual_figure, x_residual_figure
 
-    fit_figure.show()
-    residual_figure.show()
     return fit_figure, residual_figure
 
 
@@ -186,7 +186,8 @@ def make_graph(
     xsuffix: Optional[str]=None,
     ysuffix: Optional[str]=None,
     show_x_residuals=False,
-    print_outliers=True
+    print_outliers=True,
+    graph_filename="fit"
 ):
     """
     graph_title: Title for graph (RTL)
@@ -197,19 +198,21 @@ def make_graph(
     """
 
     # Reverse Hebrew RTL
-    if _is_hebrew(graph_title):
-        #graph_title_rtl = graph_title[::-1]
-        graph_title_rtl = graph_title
+    if graph_title is not None:
+        if _is_hebrew(graph_title):
+            #graph_title_rtl = graph_title[::-1]
+            graph_title_rtl = graph_title
+        else:
+            graph_title_rtl = graph_title
     else:
-        graph_title_rtl = graph_title
-
+        graph_title_rtl = None
     processed_data = fit_curve(fit_func, initial_guesses, table_or_file_path, sheet_idx, columns=columns)
 
-    figures = build_plot_with_residuals(processed_data, graph_title, xsuffix=xsuffix, ysuffix=ysuffix, 
+    figures = build_plot_with_residuals(processed_data, graph_title_rtl, xsuffix=xsuffix, ysuffix=ysuffix, 
                                     x_residuals=show_x_residuals)
 
     if output_folder is not None:
-        graph_filename = graph_title.replace(' ', '_')
+        graph_filename = graph_title.replace(' ', '_') if graph_title is not None else graph_filename
         with open(os.path.join(output_folder, f"{graph_filename}_stats.txt"), "w") as f:
             f.write(processed_data["fit_results"])
         for i, fig in enumerate(figures):
@@ -225,7 +228,7 @@ def make_graph(
                 f"=== EXAMPLE DATA FOR {graph_title_rtl} ===\n{processed_data['data'][:5]}\n================="
             )
             print(processed_data["fit_results"])
-        (fig.show() for fig in figures)
+        processed_data['show_figures'] = [fig.show() for fig in figures]
 
     if processed_data['outliers'] and print_outliers:
         print("**OUTLIERS**")

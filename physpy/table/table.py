@@ -1,5 +1,5 @@
 import pandas as pd
-
+import re
 
 def _parse_params(param_table):
     if param_table is None:
@@ -18,11 +18,11 @@ def _parse_params(param_table):
 def parse_data(filepath):
     fit_tables = {}
     params = None
+    fit_regex = re.compile('(_fit)|(fit_)', re.IGNORECASE)
     with pd.ExcelFile(filepath) as xl:
         for sheet in xl.sheet_names:
-            print(sheet)
             if sheet.lower().endswith('_fit') or sheet.lower().startswith('fit_'):
-                fit_tables[sheet.replace('_fit', '')] = pd.read_excel(xl, sheet)
+                fit_tables[re.sub(fit_regex, '', sheet)] = pd.read_excel(xl, sheet)
             if sheet.lower() == 'params':
                 params = pd.read_excel(xl, sheet)
 

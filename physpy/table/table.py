@@ -2,6 +2,8 @@ import pandas as pd
 
 
 def _parse_params(param_table):
+    if param_table is None:
+        return
     params = {}
     for param in param_table.columns.values:
         # Find errors - Currently disabled
@@ -18,9 +20,10 @@ def parse_data(filepath):
     params = None
     with pd.ExcelFile(filepath) as xl:
         for sheet in xl.sheet_names:
-            if sheet.endswith('_fit'):
+            print(sheet)
+            if sheet.lower().endswith('_fit') or sheet.lower().startswith('fit_'):
                 fit_tables[sheet.replace('_fit', '')] = pd.read_excel(xl, sheet)
-        if sheet.lower() == 'params':
-            params = pd.read_excel(xl, sheet)
+            if sheet.lower() == 'params':
+                params = pd.read_excel(xl, sheet)
 
     return fit_tables, _parse_params(params)

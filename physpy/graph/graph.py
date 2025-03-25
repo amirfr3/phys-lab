@@ -92,7 +92,7 @@ def _plot_layout(figure, plot_title, x_title, y_title):
             zerolinewidth=1
         ),
         margin=dict(
-            l=0, r=0, t=0, b=0,
+            l=20, r=20, t=20, b=20,
         )
     )
 

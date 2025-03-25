@@ -10,14 +10,17 @@ _SINGLE_PICTURE_GRAPHS = False
 _LATEX_WRAP = False
 _FILETYPE = "png"
 _GRAPH_SCALE = 5
+_LABEL_FONT_SIZE = 20
 
 def set_graph_file_type(t: str):
-    global _FILETYPE, _GRAPH_SCALE
+    global _FILETYPE, _GRAPH_SCALE, _LABEL_FONT_SIZE
     _FILETYPE=t
     if _FILETYPE not in ['svg', 'eps']:
         _GRAPH_SCALE = 5
+        _LABEL_FONT_SIZE = 20
     else:
         _GRAPH_SCALE = 1
+        _LABEL_FONT_SIZE = 15
 
 
 def single_picture_graphs(b: bool):
@@ -67,7 +70,7 @@ def _plot_layout(figure, plot_title, x_title, y_title):
         xaxis=dict(
             title=dict(
                 text=x_title,
-                font=dict(size=15)),
+                font=dict(size=_LABEL_FONT_SIZE)),
             showgrid=True,
             linecolor='grey',
             linewidth=2,
@@ -79,7 +82,7 @@ def _plot_layout(figure, plot_title, x_title, y_title):
         yaxis=dict(
             title=dict(
                 text=y_title,
-                font=dict(size=15)),
+                font=dict(size=_LABEL_FONT_SIZE)),
             showgrid=True,
             linecolor='grey',
             linewidth=2,

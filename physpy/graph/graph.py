@@ -112,8 +112,8 @@ def _fit_plot(data, plot_name: Optional[str]=None, xsuffix: Optional[str]=None, 
     y_label = data['columns'][2].split()[0]
 
     _plot_layout(fit_figure, plot_name, 
-                 _latex_wrap(f'{x_label}{sep}{x_label_suffix}'.replace('~', r'\sim')), 
-                 _latex_wrap(f'{y_label}{sep}{y_label_suffix}'.replace('~', r'\sim')))
+                 _latex_wrap(f'{x_label}{sep}{x_label_suffix}'), 
+                 _latex_wrap(f'{y_label}{sep}{y_label_suffix}'))
 
     return fit_figure
 
@@ -139,8 +139,8 @@ def _residual_plot(data, data_x, residuals, error_x, error_y, plot_name:Optional
     y_label = data['columns'][2].split()[0]
     
     _plot_layout(residual_figure, plot_name, 
-        _latex_wrap(f'{x_label}{sep}{x_label_suffix}'.replace('~', r'\sim')),
-        _latex_wrap(f'{y_label} - {fit_func_name}({x_label}){sep}{y_label_suffix}'.replace('~', r'\sim'))
+        _latex_wrap(f'{x_label}{sep}{x_label_suffix}'),
+        _latex_wrap(f'{y_label} - {fit_func_name}({x_label}){sep}{y_label_suffix}')
     )
 
     return residual_figure

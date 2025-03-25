@@ -8,6 +8,16 @@ from typing import Optional
 
 _SINGLE_PICTURE_GRAPHS = False
 _LATEX_WRAP = False
+_FILETYPE = "png"
+_GRAPH_SCALE = 5
+
+def set_graph_file_type(t: str):
+    global _FILETYPE, _GRAPH_SCALE
+    _FILETYPE=t
+    if _FILETYPE not in ['svg', 'eps']:
+        _GRAPH_SCALE = 5
+    else:
+        _GRAPH_SCALE = 1
 
 
 def single_picture_graphs(b: bool):
@@ -78,6 +88,9 @@ def _plot_layout(figure, plot_title, x_title, y_title):
             zerolinecolor='lightgrey',
             zerolinewidth=1
         ),
+        margin=dict(
+            l=0, r=0, t=0, b=0,
+        )
     )
 
 
@@ -216,7 +229,7 @@ def make_graph(
         with open(os.path.join(output_folder, f"{graph_filename}_stats.txt"), "w") as f:
             f.write(processed_data["fit_results"])
         for i, fig in enumerate(figures):
-            fig.write_image(os.path.join(output_folder, f"{graph_filename}_{i}.svg"))
+            fig.write_image(os.path.join(output_folder, f"{graph_filename}_{i}.{_FILETYPE}"), scale=_GRAPH_SCALE)
             #fig.savefig(os.path.join(output_folder,f"{graph_filename}_{i}.svg"), bbox_inches='tight')
         pd.concat((processed_data['x'], processed_data['delta_x'], 
                   processed_data['y'], processed_data['delta_y']), axis=1)\

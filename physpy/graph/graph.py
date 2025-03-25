@@ -57,7 +57,7 @@ def _plot_layout(figure, plot_title, x_title, y_title):
         xaxis=dict(
             title=dict(
                 text=x_title,
-                font=dict(size=20)),
+                font=dict(size=15)),
             showgrid=True,
             linecolor='grey',
             linewidth=2,
@@ -69,7 +69,7 @@ def _plot_layout(figure, plot_title, x_title, y_title):
         yaxis=dict(
             title=dict(
                 text=y_title,
-                font=dict(size=20)),
+                font=dict(size=15)),
             showgrid=True,
             linecolor='grey',
             linewidth=2,

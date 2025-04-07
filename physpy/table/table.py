@@ -5,13 +5,9 @@ def _parse_params(param_table):
     if param_table is None:
         return
     params = {}
-    for param in param_table.columns.values:
-        # Find errors - Currently disabled
-        #error=None
-        #for p in param_table.columns.values:
-        #    if p.startwith("d"+param.split[0]):
-        #        error = p
-        params[param.split()[0]] = param_table[param][0] if len(param_table[param]) == 1 else param_table[param]
+    print(param_table.columns)
+    for param in filter(lambda n: not n.startswith('Unnamed'), param_table.columns.values):
+        params[param] = param_table[param][0] if len(param_table[param]) == 1 else tuple(p[1] for p in param_table[param].items())
 
     return params
 
@@ -25,5 +21,6 @@ def parse_data(filepath):
                 fit_tables[re.sub(fit_regex, '', sheet)] = pd.read_excel(xl, sheet)
             if sheet.lower() == 'params':
                 params = pd.read_excel(xl, sheet)
+                print(params)
 
     return fit_tables, _parse_params(params)

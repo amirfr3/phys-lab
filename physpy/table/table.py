@@ -5,7 +5,6 @@ def _parse_params(param_table):
     if param_table is None:
         return
     params = {}
-    print(param_table.columns)
     for param in filter(lambda n: not n.startswith('Unnamed'), param_table.columns.values):
         params[param] = param_table[param][0] if len(param_table[param]) == 1 else tuple(p[1] for p in param_table[param].items())
 

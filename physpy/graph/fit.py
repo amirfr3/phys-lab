@@ -62,7 +62,7 @@ def find_outliers(residuals, errors):
         ],
     )
 
-    return sorted(outliers, key=lambda x: x[1])
+    return sorted(outliers, key=lambda x: x[1], reverse=True)
 
 
 def get_columns(data, columns):

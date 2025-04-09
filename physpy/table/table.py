@@ -20,6 +20,5 @@ def parse_data(filepath):
                 fit_tables[re.sub(fit_regex, '', sheet)] = pd.read_excel(xl, sheet)
             if sheet.lower() == 'params':
                 params = pd.read_excel(xl, sheet)
-                print(params)
 
     return fit_tables, _parse_params(params)

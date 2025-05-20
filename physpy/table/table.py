@@ -22,3 +22,6 @@ def parse_data(filepath):
                 params = pd.read_excel(xl, sheet)
 
     return fit_tables, _parse_params(params)
+
+def rename(table, old_columns, new_columns):
+    return table.rename(columns={old:new for old, new in zip(old_columns, new_columns)})

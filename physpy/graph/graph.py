@@ -133,13 +133,15 @@ def _residual_plot(data, data_x, residuals, error_x, error_y, plot_name:Optional
     if plot_name is not None:
         plot_name = plot_name + title_suffix_hebrew if _is_hebrew(plot_name) else plot_name + title_suffix
 
+    x_idx, y_idx = (0, 2) if data['x'].name == data_x.name else (2, 0)
+
     sep = '\\,' if _LATEX_WRAP else ' '
-    x_label_suffix = sep.join(((data['columns'][0].split()[1] if len(data['columns'][0].split()) > 1 else ''),
+    x_label_suffix = sep.join(((data['columns'][x_idx].split()[1] if len(data['columns'][x_idx].split()) > 1 else ''),
         (xsuffix if xsuffix is not None else '')))
-    x_label = data['columns'][0].split()[0]
-    y_label_suffix = sep.join(((data['columns'][2].split()[1] if len(data['columns'][2].split()) > 1 else ''),
+    x_label = data['columns'][x_idx].split()[0]
+    y_label_suffix = sep.join(((data['columns'][y_idx].split()[1] if len(data['columns'][y_idx].split()) > 1 else ''),
         (ysuffix if ysuffix is not None else '')))
-    y_label = data['columns'][2].split()[0]
+    y_label = data['columns'][y_idx].split()[0]
     
     _plot_layout(residual_figure, plot_name, 
         _latex_wrap(f'{x_label}{sep}{x_label_suffix}'),

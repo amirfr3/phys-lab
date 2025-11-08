@@ -1,5 +1,7 @@
 import pandas as pd
 import re
+import csv
+
 
 def _parse_params(param_table):
     if param_table is None:
@@ -9,6 +11,7 @@ def _parse_params(param_table):
         params[param] = param_table[param][0] if len(param_table[param]) == 1 else tuple(p[1] for p in param_table[param].items())
 
     return params
+
 
 def parse_data(filepath):
     fit_tables = {}
@@ -22,6 +25,20 @@ def parse_data(filepath):
                 params = pd.read_excel(xl, sheet)
 
     return fit_tables, _parse_params(params)
+
+
+def parse_param_csv(filepath)
+    params = {}
+    with open(filepath, 'r') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            params[row['name']] = {
+                'value': float(row['value']),
+                'uncert': float(row['uncert']),
+                'unit': row['unit']
+            }
+    return params
+
 
 def rename(table, old_columns, new_columns):
     return table.rename(columns={old:new for old, new in zip(old_columns, new_columns)})

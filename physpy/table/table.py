@@ -33,8 +33,8 @@ def parse_param_csv(filepath):
         reader = csv.DictReader(csvfile)
         for row in reader:
             params[row['name']] = {
-                'value': float(row['value']),
-                'uncert': float(row['uncert']),
+                'value': float(row['value']) if row['value'] else 0.0,
+                'uncert': float(row['uncert']) if row['uncert'] else 0.0,
                 'unit': row['unit']
             }
     return params

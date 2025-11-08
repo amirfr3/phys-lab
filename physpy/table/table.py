@@ -29,9 +29,10 @@ def parse_data(filepath):
 
 def parse_param_csv(filepath):
     params = {}
-    with open(filepath, 'r') as csvfile:
+    with open(filepath, mode='r', encoding='utf-8-sig') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
+            print(row)
             params[row['name']] = {
                 'value': float(row['value']),
                 'uncert': float(row['uncert']),

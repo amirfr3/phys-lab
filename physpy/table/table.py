@@ -27,7 +27,7 @@ def parse_data(filepath):
     return fit_tables, _parse_params(params)
 
 
-def parse_param_csv(filepath)
+def parse_param_csv(filepath):
     params = {}
     with open(filepath, 'r') as csvfile:
         reader = csv.DictReader(csvfile)

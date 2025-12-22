@@ -1,11 +1,8 @@
 pandas
 numpy
-matplotlib
+plotly
+kaliedo
 scipy
-
 uncertainties
-docx
-math2docx
-
 sympy
 antlr4-python3-runtime==4.11.*

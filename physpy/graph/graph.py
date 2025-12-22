@@ -8,14 +8,14 @@ from typing import Optional
 
 _SINGLE_PICTURE_GRAPHS = False
 _LATEX_WRAP = False
-_FILETYPE = "png"
-_GRAPH_SCALE = 5
-_LABEL_FONT_SIZE = 20
+_FILETYPE = "pdf"
+_GRAPH_SCALE = 1
+_LABEL_FONT_SIZE = 15
 
 def set_graph_file_type(t: str):
     global _FILETYPE, _GRAPH_SCALE, _LABEL_FONT_SIZE
     _FILETYPE=t
-    if _FILETYPE not in ['svg', 'eps']:
+    if _FILETYPE not in ['svg', 'eps', 'pdf']:
         _GRAPH_SCALE = 5
         _LABEL_FONT_SIZE = 20
     else:

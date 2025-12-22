@@ -10,7 +10,7 @@ _SINGLE_PICTURE_GRAPHS = False
 _LATEX_WRAP = False
 _FILETYPE = "pdf"
 _GRAPH_SCALE = 1
-_LABEL_FONT_SIZE = 20
+_LABEL_FONT_SIZE = 15
 
 def set_graph_file_type(t: str):
     global _FILETYPE, _GRAPH_SCALE, _LABEL_FONT_SIZE
